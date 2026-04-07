@@ -19,11 +19,10 @@ export function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
     try {
-      const response = await apiFetch<LoginResponse>("/auth/login", {
+      await apiFetch<LoginResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      localStorage.setItem("fairlens_session_token", response.session_token);
       setError(null);
       navigate("/");
     } catch (err) {
