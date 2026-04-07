@@ -1,0 +1,11 @@
+prediction,label,gender,age_group
+1,1,M,adult
+1,1,M,adult
+1,1,M,adult
+1,0,M,adult
+0,0,F,adult
+0,1,F,adult
+0,0,F,adult
+1,1,M,senior
+1,0,M,senior
+0,0,F,senior

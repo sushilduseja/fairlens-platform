@@ -1,0 +1,18 @@
+:root {
+  --bg: #f5efe4;
+  --surface: #fffaf2;
+  --surface-elevated: #ffffff;
+  --text: #1e1c19;
+  --muted: #5f5a52;
+  --accent: #045a4b;
+  --accent-strong: #023a30;
+  --danger: #9f1239;
+  --warn: #92400e;
+  --ok: #065f46;
+  --border: #d8cdb8;
+  --shadow: 0 12px 30px rgba(40, 33, 20, 0.08);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-display: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+}

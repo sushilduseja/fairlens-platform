@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./fairlens.db
+      REDIS_URL: redis://redis:6379
+      UPLOAD_DIR: ./uploads
+      STATIC_DIR: ./backend/static
+      SECRET_KEY: dev-only-secret-change-me
+    depends_on:
+      - redis
+    volumes:
+      - ./:/app
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
