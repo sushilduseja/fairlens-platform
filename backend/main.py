@@ -28,15 +28,15 @@ def create_app() -> FastAPI:
     app.add_middleware(AuditLogMiddleware)
     register_error_handlers(app)
 
+    app.include_router(api_router)
+
     static_dir = Path(settings.STATIC_DIR)
     static_dir.mkdir(parents=True, exist_ok=True)
-    app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
+    app.mount("/assets", StaticFiles(directory=static_dir), name="assets")
 
     @app.get("/{path:path}")
     async def serve_spa(path: str):
         return HTMLResponse(content=(static_dir / "index.html").read_text(), media_type="text/html")
-
-    app.include_router(api_router)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
