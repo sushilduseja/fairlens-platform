@@ -52,6 +52,7 @@ export type AuditDetail = {
   status: string;
   overall_verdict: string | null;
   dataset_row_count: number | null;
+  protected_attributes: string[];
   results: FairnessResult[];
   recommendations: Recommendation[];
   error_message: string | null;

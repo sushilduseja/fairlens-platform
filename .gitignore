@@ -23,9 +23,12 @@ frontend/dist/
 .ruff_cache/
 pytest-cache-files-*/
 *.tsbuildinfo
+fairlens_platform.egg-info/
+.sandbox_tmp/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+.gstack/

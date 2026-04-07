@@ -9,12 +9,11 @@ services:
       DATABASE_URL: sqlite+aiosqlite:///./fairlens.db
       REDIS_URL: redis://redis:6379
       UPLOAD_DIR: ./uploads
-      STATIC_DIR: ./backend/static
+      STATIC_DIR: ./static
       SECRET_KEY: dev-only-secret-change-me
     depends_on:
       - redis
-    volumes:
-      - ./:/app
+    volumes: []
 
   redis:
     image: redis:7-alpine

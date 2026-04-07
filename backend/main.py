@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -29,7 +30,11 @@ def create_app() -> FastAPI:
 
     static_dir = Path(settings.STATIC_DIR)
     static_dir.mkdir(parents=True, exist_ok=True)
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    app.mount("/static", StaticFiles(directory=static_dir, html=True), name="static")
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        return HTMLResponse(content=(static_dir / "index.html").read_text(), media_type="text/html")
 
     app.include_router(api_router)
 

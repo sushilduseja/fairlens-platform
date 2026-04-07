@@ -21,7 +21,8 @@ COPY pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir .
 
-COPY --from=frontend-build /app/frontend/dist ./backend/static
+# Force rebuild - copy static files
+COPY --from=frontend-build /app/frontend/dist /app/static
 
 EXPOSE 8000
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
