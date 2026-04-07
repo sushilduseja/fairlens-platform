@@ -458,3 +458,117 @@ FairLens meets the compliance, security, and reporting requirements of an enterp
 6. **Automated bias remediation.** The product recommends mitigations; it does not apply them. Automated remediation requires access to the model training pipeline, which is outside the product boundary.
 7. **Counterfactual fairness and individual fairness metrics.** These require causal model assumptions that most financial services teams are not prepared to specify. Adding them without adequate UX for causal graph input would produce unreliable results.
 8. **Webhook callbacks for audit completion.** No Phase 1–3 user has a downstream system ready to consume webhooks. Front-end polling and email-on-completion (future) cover the notification need.
+
+## Design Decisions Added
+
+### Dashboard Information Hierarchy
+Primary: "New Audit" button — prominent CTA, always visible in page header.
+Secondary: Audit table — shows model name, status badge (color-coded), verdict (PASS/CONDITIONAL_PASS/FAIL), created date. Sorted most-recent-first.
+Tertiary: Model filter dropdown — optional filtering by model.
+
+### New Audit View Hierarchy
+Primary: Model selector (dropdown or inline create) — user selects existing model or creates new one first.
+Secondary: CSV file upload zone — drag-and-drop with file size/format validation feedback.
+Tertiary: Column mapper — after upload, select prediction column and optional ground truth column.
+Quaternary: Protected attribute configurator — add rows specifying attribute column, type, privileged/unprivileged groups.
+Quinary: Metric selector — checkbox list with inline descriptions.
+
+### Audit Detail View Hierarchy
+Primary: Status progress indicator — queued → processing → completed, with auto-refresh (tell user what's happening first).
+Secondary: Overall verdict badge — large, prominent, color-coded (green/amber/red), shown only when status is "completed".
+Tertiary: Results table — per metric × attribute: disparity value, CI range, p-value, status badge.
+Quaternary: Recommendations panel — prioritized list with issue, mitigation strategy, effort level.
+Quinary: Dataset summary — row count, attribute distributions.
+
+### Interaction State Specifications
+| View | State | User Sees | Behavior |
+|------|-------|-----------|----------|
+| Dashboard | Empty | "No audits yet" warm message + "New Audit" CTA + 1-line FairLens explanation | — |
+| Dashboard | Loading | Spinner in table body | Show after 200ms delay |
+| Dashboard | Error | Error banner with retry button | Retry fetches latest list |
+| New Audit | File Selected | Show column mapper, hide upload zone | Auto-populate column dropdowns |
+| New Audit | Config Incomplete | Inline validation message | Disable Submit until valid |
+| New Audit | Submitting | "Submitting..." disabled button + spinner | — |
+| New Audit | Error | "Invalid CSV format" with specific error message | Highlight problematic field |
+| Audit Detail | Processing | Status: "Processing..." + spinner + "This typically takes 30-90 seconds" | Auto-poll every 5s |
+| Audit Detail | Failed | Error message + "Retry" button | Re-submit same config |
+| Results | Partial | Show available results with "Processing remaining metrics..." banner | — |
+
+### User Journey Storyboard — First-Time User
+
+| Step | User Does | User Feels | UI Response |
+|------|-----------|------------|--------------|
+| 1 | Lands on `/register` | Curiosity, "another tool?" | Clean form, minimal distractions |
+| 2 | Enters email/password, clicks Register | Anticipation | Immediate redirect |
+| 3 | Sees API key displayed | Relief + need to copy | Copy button prominent, "Save this key" message |
+| 4 | Auto-redirects to `/` dashboard | Slight confusion — "now what?" | Empty state with warm message + "New Audit" CTA + 1-line: "Upload model predictions to check for bias" |
+| 5 | Clicks "New Audit" button | Ready to test | Model selector prominent, or "Create your first model" if none |
+| 6 | Selects model, uploads CSV | Nervous — "did I do this right?" | Validation feedback: "Valid CSV, 10,000 rows detected" |
+| 7 | Maps columns, selects attributes/metrics | Focused but uncertain | "3 metrics selected, ready to run" confirmation |
+| 8 | Clicks Submit | Hope mixed with patience | Status: "Queued" + estimated time |
+| 9 | Polling sees "processing" | Waiting | Progress: "Processing... typically 30-90 seconds" |
+| 10 | Verdict appears | Relief (PASS) or concern (FAIL) | Verdict badge: large, color-coded |
+| 11 | Reads results + recommendations | "What do I do now?" | Recommendations sorted by priority with effort estimate |
+
+### Returning User Journey
+
+| Step | User Does | User Feels | UI Response |
+|------|-----------|------------|--------------|
+| 1 | Lands on `/` dashboard | Purposeful — checking results | Table of audits, most recent first |
+| 2 | Sees audit status "processing" | Waiting, checking progress | Status badge + auto-refresh |
+| 3 | Clicks completed audit | Ready to review | Full results + recommendations |
+| 4 | Clicks "New Audit" | Efficiency — knows flow | Pre-selected last-used model if exists |
+
+### Design System Recommendation
+
+**Run /design-consultation to create DESIGN.md before implementation.**
+
+This would define:
+- Color system: PASS/FAIL verdict colors, status badges, brand accent
+- Typography scale: Font families, sizes for headings/body/captions
+- Component library: Button styles, form inputs, table designs
+- Spacing/grid: Base unit, component gaps, section margins
+- Interaction patterns: Hover states, transitions, loading animations
+
+Without DESIGN.md, implementers make ad-hoc decisions that won't be consistent.
+
+### Responsive Specification (Required)
+
+| View | Desktop (1200px+) | Tablet (768-1199px) | Mobile (320-767px) |
+|------|-------------------|---------------------|---------------------|
+| Dashboard | Table: full columns | Table: horizontal scroll or collapse date column | Card list: one audit per row |
+| New Audit | Two-column: model left, upload right | Stacked: model above upload | Single column, full-width |
+| Audit Detail | Full results table | Horizontal scroll table | Stacked: verdict → status → results cards |
+| Navigation | Top nav bar | Hamburger menu | Hamburger menu |
+
+### Responsive Breakpoints
+- Mobile: 320px - 767px
+- Tablet: 768px - 1199px  
+- Desktop: 1200px+
+
+### Touch Targets
+- All buttons and interactive elements: minimum 44px height
+- Table rows: minimum 48px height for tap target
+
+### Color Contrast (Desktop-focused)
+- PASS badge: verify contrast ratio ≥ 4.5:1
+- FAIL badge: verify contrast ratio ≥ 4.5:1
+- If not accessible, add text label alongside color
+
+### Accessibility (Deferred / Not in Scope)
+- Screen reader optimization: not required for MVP
+- Keyboard navigation: basic support (Tab through forms)
+- ARIA landmarks: skip for MVP
+
+### Unresolved Design Decisions — Resolved
+
+| Decision | Resolution | Rationale |
+|----------|------------|-----------|
+| Empty state messaging | "No audits yet. Run your first fairness check to see results here." + "New Audit" CTA | Warm, actionable, explains value |
+| Mobile navigation pattern | Hamburger icon in header, slide-out menu from right | Standard pattern, familiar to users |
+| Verdict badge colors | PASS: Emerald 600 (#059669), FAIL: Rose 600 (#e11d48), CONDITIONAL_PASS: Amber 600 (#d97706) | High contrast, accessible with text labels |
+| Table sorting defaults | Sort by created_at descending (most recent first) | Users want to see latest results |
+| File upload progress | Percentage text + progress bar + "Uploading..." status | Clear feedback for large files |
+| Results table pagination | 20 rows per page, sortable columns | Standard data table pattern |
+| Error message style | Inline validation for forms, toast for async actions | Context-appropriate feedback |
+| Status badge style | Pill-shaped, with icon + text (e.g., "✓ Completed") | Clear without relying on color alone |

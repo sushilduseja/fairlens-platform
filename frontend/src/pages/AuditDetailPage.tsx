@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { StatusBadge } from "../components/StatusBadge";
 import { usePollAudit } from "../hooks/usePollAudit";
@@ -9,68 +9,176 @@ export function AuditDetailPage() {
   const { audit, error } = usePollAudit(id);
 
   if (error) {
-    return <p className="error">{error}</p>;
+    return (
+      <div className="error-container">
+        <div className="error-card">
+          <div className="error-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
+            </svg>
+          </div>
+          <h3>Error Loading Audit</h3>
+          <p>{error}</p>
+          <Link to="/" className="btn-primary">Back to Dashboard</Link>
+        </div>
+      </div>
+    );
   }
+
   if (!audit) {
-    return <p>Loading audit...</p>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading audit...</p>
+      </div>
+    );
   }
+
+  const isProcessing = audit.status === "queued" || audit.status === "processing";
 
   return (
-    <section>
-      <div className="header-row">
-        <h2>Audit Results</h2>
-        <StatusBadge value={audit.overall_verdict ?? audit.status} />
+    <section className="audit-detail">
+      {/* Header with status first */}
+      <div className="audit-header">
+        <div className="audit-header-left">
+          <Link to="/" className="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+          </Link>
+          <h2>Audit Results</h2>
+        </div>
+        <div className="audit-header-right">
+          <StatusBadge value={audit.status} large />
+          {audit.overall_verdict && !isProcessing && (
+            <StatusBadge value={audit.overall_verdict} large />
+          )}
+        </div>
       </div>
 
-      <div className="card">
-        <p><strong>Status:</strong> <StatusBadge value={audit.status} /></p>
-        <p><strong>Rows:</strong> {audit.dataset_row_count ?? "-"}</p>
-        <p><strong>Started:</strong> {formatDate(audit.started_at)}</p>
-        <p><strong>Completed:</strong> {formatDate(audit.completed_at)}</p>
-        {audit.error_message ? <p className="error">{audit.error_message}</p> : null}
+      {/* Processing State */}
+      {isProcessing && (
+        <div className="processing-card">
+          <div className="processing-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <div className="processing-content">
+            <h3>Audit {audit.status === "queued" ? "Queued" : "Processing"}</h3>
+            <p>This typically takes 30-90 seconds for a 10,000-row dataset.</p>
+            <div className="progress-bar">
+              <div className="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {audit.status === "failed" && audit.error_message && (
+        <div className="error-state-card">
+          <div className="error-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M15 9l-6 6M9 9l6 6"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Audit Failed</h4>
+            <p>{audit.error_message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Dataset Info */}
+      <div className="info-grid">
+        <div className="info-card">
+          <span className="info-label">Dataset Rows</span>
+          <span className="info-value">{audit.dataset_row_count?.toLocaleString() ?? "-"}</span>
+        </div>
+        <div className="info-card">
+          <span className="info-label">Started</span>
+          <span className="info-value">{formatDate(audit.started_at)}</span>
+        </div>
+        <div className="info-card">
+          <span className="info-label">Completed</span>
+          <span className="info-value">{formatDate(audit.completed_at)}</span>
+        </div>
+        <div className="info-card">
+          <span className="info-label">Protected Attributes</span>
+          <span className="info-value">{audit.protected_attributes?.length ?? 0}</span>
+        </div>
       </div>
 
-      <div className="card table-wrap">
-        <h3>Metric Results</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Attribute</th>
-              <th>Disparity</th>
-              <th>CI</th>
-              <th>p-value</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {audit.results.map((result, index) => (
-              <tr key={`${result.metric_name}-${result.protected_attribute}-${index}`}>
-                <td>{result.metric_name}</td>
-                <td>{result.protected_attribute}</td>
-                <td>{formatNumber(result.disparity)}</td>
-                <td>{formatNumber(result.confidence_interval_lower)} - {formatNumber(result.confidence_interval_upper)}</td>
-                <td>{formatNumber(result.p_value)}</td>
-                <td><StatusBadge value={result.status} /></td>
-              </tr>
+      {/* Metric Results Table */}
+      {audit.results.length > 0 && (
+        <div className="results-section">
+          <h3>Metric Results</h3>
+          <div className="card table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Attribute</th>
+                  <th>Disparity</th>
+                  <th>95% CI</th>
+                  <th>p-value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {audit.results.map((result, index) => (
+                  <tr key={`${result.metric_name}-${result.protected_attribute}-${index}`}>
+                    <td className="metric-name">{result.metric_name}</td>
+                    <td>{result.protected_attribute}</td>
+                    <td className="metric-value">{formatNumber(result.disparity)}</td>
+                    <td className="metric-ci">
+                      [{formatNumber(result.confidence_interval_lower)}, {formatNumber(result.confidence_interval_upper)}]
+                    </td>
+                    <td className="metric-pvalue">{formatNumber(result.p_value)}</td>
+                    <td><StatusBadge value={result.status} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Recommendations */}
+      {audit.recommendations.length > 0 && (
+        <div className="recommendations-section">
+          <h3>Recommendations</h3>
+          <div className="recommendations-list">
+            {audit.recommendations.map((item, index) => (
+              <div key={`${item.issue}-${index}`} className="recommendation-card">
+                <div className="recommendation-header">
+                  <StatusBadge value={item.priority} />
+                  <span className="effort-tag">{item.implementation_effort}</span>
+                </div>
+                <h4>{item.issue}</h4>
+                <p className="mitigation">{item.mitigation_strategy}</p>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </div>
+      )}
 
-      <div className="card">
-        <h3>Recommendations</h3>
-        <ul className="recommendations">
-          {audit.recommendations.map((item, index) => (
-            <li key={`${item.issue}-${index}`}>
-              <StatusBadge value={item.priority} />
-              <p><strong>{item.issue}</strong></p>
-              <p>{item.mitigation_strategy}</p>
-              <small>Effort: {item.implementation_effort}</small>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* No Recommendations */}
+      {audit.overall_verdict === "PASS" && audit.recommendations.length === 0 && !isProcessing && (
+        <div className="success-state">
+          <div className="success-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <path d="M22 4L12 14.01l-3-3"/>
+            </svg>
+          </div>
+          <h3>All Checks Passed</h3>
+          <p>This audit passed all fairness criteria. No recommendations needed.</p>
+        </div>
+      )}
     </section>
   );
 }

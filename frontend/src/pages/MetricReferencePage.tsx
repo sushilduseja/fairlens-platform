@@ -12,6 +12,7 @@ const useCaseFilters = [
   { label: "Credit", value: "credit" },
   { label: "Fraud", value: "fraud" },
   { label: "Underwriting", value: "underwriting" },
+  { label: "Insurance", value: "insurance" },
 ];
 
 export function MetricReferencePage() {
@@ -33,11 +34,19 @@ export function MetricReferencePage() {
   );
 
   return (
-    <section>
-      <h2>Metric Reference</h2>
-      <div className="tabs">
+    <section className="metric-reference">
+      <div className="page-header">
+        <h2>Metric Reference</h2>
+        <p>Learn which fairness metrics to use for your specific use case.</p>
+      </div>
+
+      <div className="filter-tabs">
         {useCaseFilters.map((item) => (
-          <button key={item.value} onClick={() => setFilter(item.value)} className={filter === item.value ? "active" : ""}>
+          <button 
+            key={item.value} 
+            onClick={() => setFilter(item.value)} 
+            className={`filter-tab ${filter === item.value ? "active" : ""}`}
+          >
             {item.label}
           </button>
         ))}
@@ -45,15 +54,43 @@ export function MetricReferencePage() {
 
       <div className="metrics-grid">
         {filtered.map((metric) => (
-          <article key={metric.name} className="card metric-card">
-            <h3>{metric.display_name}</h3>
-            <p>{metric.description}</p>
-            <p><strong>Use Cases:</strong> {metric.use_cases.join(", ")}</p>
-            <p><strong>Limitations:</strong> {metric.limitations.join("; ")}</p>
-            <p><strong>Ground Truth:</strong> {metric.requires_ground_truth ? "Required" : "Not required"}</p>
+          <article key={metric.name} className="metric-card">
+            <div className="metric-header">
+              <h3>{metric.display_name}</h3>
+              {metric.requires_ground_truth && (
+                <span className="metric-badge">Requires Labels</span>
+              )}
+            </div>
+            <p className="metric-description">{metric.description}</p>
+            
+            <div className="metric-details">
+              <div className="detail-section">
+                <h4>Use Cases</h4>
+                <div className="use-case-tags">
+                  {metric.use_cases.map((useCase) => (
+                    <span key={useCase} className="use-case-tag">{useCase}</span>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="detail-section">
+                <h4>Limitations</h4>
+                <ul className="limitations-list">
+                  {metric.limitations.map((limitation, index) => (
+                    <li key={index}>{limitation}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </article>
         ))}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <p>No metrics found for this filter.</p>
+        </div>
+      )}
     </section>
   );
 }

@@ -39,6 +39,8 @@ export function NewAuditPage() {
   const [newModelUseCase, setNewModelUseCase] = useState("credit_approval");
 
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     apiFetch<MetricResponse>("/metrics")
@@ -60,12 +62,8 @@ export function NewAuditPage() {
   }
 
   async function createModelIfNeeded(): Promise<string> {
-    if (modelId) {
-      return modelId;
-    }
-    if (!newModelName) {
-      throw new Error("Select existing model or enter new model name.");
-    }
+    if (modelId) return modelId;
+    if (!newModelName) throw new Error("Select existing model or enter new model name.");
     const model = await apiFetch<ModelCreateResponse>("/models", {
       method: "POST",
       body: JSON.stringify({ name: newModelName, use_case: newModelUseCase, description: null }),
@@ -83,6 +81,7 @@ export function NewAuditPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const chosenModelId = await createModelIfNeeded();
       const payload = new FormData();
@@ -101,134 +100,280 @@ export function NewAuditPage() {
       navigate(`/audits/${result.audit_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit audit");
+      setIsSubmitting(false);
     }
   }
 
+  const canProceedToStep2 = file && headers.length > 0;
+  const canProceedToStep3 = attributes.filter(a => a.name && a.privileged_group && a.unprivileged_group).length > 0;
+  const canSubmit = canProceedToStep2 && canProceedToStep3 && selectedMetrics.length > 0 && (modelId || newModelName);
+
   return (
-    <section>
-      <h2>New Audit</h2>
-      <form className="audit-form" onSubmit={onSubmit}>
-        <div className="card">
-          <h3>Model</h3>
-          <label>
-            Existing model
-            <select value={modelId} onChange={(e) => setModelId(e.target.value)}>
-              <option value="">Create new</option>
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>{model.name}</option>
-              ))}
-            </select>
-          </label>
-          {!modelId ? (
-            <>
+    <section className="new-audit">
+      <div className="new-audit-header">
+        <h2>New Audit</h2>
+        <p>Configure and run a fairness audit on your model predictions.</p>
+      </div>
+
+      {/* Step Indicator */}
+      <div className="step-indicator">
+        <div className={`step ${step >= 1 ? "active" : ""} ${step > 1 ? "completed" : ""}`}>
+          <span className="step-number">1</span>
+          <span className="step-label">Model & Data</span>
+        </div>
+        <div className="step-line"></div>
+        <div className={`step ${step >= 2 ? "active" : ""} ${step > 2 ? "completed" : ""}`}>
+          <span className="step-number">2</span>
+          <span className="step-label">Attributes</span>
+        </div>
+        <div className="step-line"></div>
+        <div className={`step ${step >= 3 ? "active" : ""}`}>
+          <span className="step-number">3</span>
+          <span className="step-label">Metrics</span>
+        </div>
+      </div>
+
+      <form className="new-audit-form" onSubmit={onSubmit}>
+        {/* Step 1: Model & Data */}
+        <div className={`form-step ${step === 1 ? "active" : "inactive"}`}>
+          <div className="step-content">
+            <div className="card">
+              <h3>
+                <span className="step-icon">1</span>
+                Select Model
+              </h3>
               <label>
-                New model name
-                <input value={newModelName} onChange={(e) => setNewModelName(e.target.value)} />
-              </label>
-              <label>
-                Use case
-                <select value={newModelUseCase} onChange={(e) => setNewModelUseCase(e.target.value)}>
-                  <option value="credit_approval">Credit approval</option>
-                  <option value="fraud_detection">Fraud detection</option>
-                  <option value="underwriting">Underwriting</option>
-                  <option value="insurance">Insurance</option>
-                  <option value="other">Other</option>
+                Existing model
+                <select value={modelId} onChange={(e) => { setModelId(e.target.value); setNewModelName(""); }}>
+                  <option value="">Create new model</option>
+                  {models.map((model) => (
+                    <option key={model.id} value={model.id}>{model.name}</option>
+                  ))}
                 </select>
               </label>
-            </>
-          ) : null}
-        </div>
-
-        <FileUploader onFileSelected={onFileSelected} />
-
-        <div className="card">
-          <h3>Column Mapping</h3>
-          <label>
-            Prediction column
-            <select value={predictionColumn} onChange={(e) => setPredictionColumn(e.target.value)}>
-              {headers.map((header) => (
-                <option key={header} value={header}>{header}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Ground truth column (optional)
-            <select value={groundTruthColumn} onChange={(e) => setGroundTruthColumn(e.target.value)}>
-              <option value="">Not provided</option>
-              {headers.map((header) => (
-                <option key={header} value={header}>{header}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="card">
-          <h3>Protected Attributes</h3>
-          {attributes.map((attribute, index) => (
-            <div key={index} className="attribute-row">
-              <select
-                value={attribute.name}
-                onChange={(e) => {
-                  const next = [...attributes];
-                  next[index].name = e.target.value;
-                  setAttributes(next);
-                }}
-              >
-                {headers.map((header) => (
-                  <option key={header} value={header}>{header}</option>
-                ))}
-              </select>
-              <input
-                placeholder="Privileged group"
-                value={attribute.privileged_group}
-                onChange={(e) => {
-                  const next = [...attributes];
-                  next[index].privileged_group = e.target.value;
-                  setAttributes(next);
-                }}
-              />
-              <input
-                placeholder="Unprivileged group"
-                value={attribute.unprivileged_group}
-                onChange={(e) => {
-                  const next = [...attributes];
-                  next[index].unprivileged_group = e.target.value;
-                  setAttributes(next);
-                }}
-              />
+              {!modelId && (
+                <>
+                  <label>
+                    New model name
+                    <input 
+                      value={newModelName} 
+                      onChange={(e) => setNewModelName(e.target.value)} 
+                      placeholder="e.g., Credit Scoring v3.1"
+                    />
+                  </label>
+                  <label>
+                    Use case
+                    <select value={newModelUseCase} onChange={(e) => setNewModelUseCase(e.target.value)}>
+                      <option value="credit_approval">Credit Approval</option>
+                      <option value="fraud_detection">Fraud Detection</option>
+                      <option value="underwriting">Underwriting</option>
+                      <option value="insurance">Insurance</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+                </>
+              )}
             </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setAttributes((prev) => [...prev, { name: headers[0] ?? "", type: "categorical", privileged_group: "", unprivileged_group: "" }])}
-          >
-            Add Attribute
-          </button>
-        </div>
 
-        <div className="card">
-          <h3>Metrics</h3>
-          <div className="metric-checks">
-            {metrics.map((metric) => (
-              <label key={metric.name}>
-                <input
-                  type="checkbox"
-                  checked={selectedMetrics.includes(metric.name)}
-                  onChange={(e) => {
-                    setSelectedMetrics((prev) =>
-                      e.target.checked ? [...prev, metric.name] : prev.filter((name) => name !== metric.name)
-                    );
-                  }}
-                />
-                <span>{metric.display_name}</span>
-                <small>{metric.description}</small>
-              </label>
-            ))}
+            <div className="card">
+              <h3>
+                <span className="step-icon">2</span>
+                Upload Data
+              </h3>
+              <FileUploader onFileSelected={onFileSelected} />
+              
+              {file && headers.length > 0 && (
+                <div className="file-preview">
+                  <div className="file-info">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                      <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                    </svg>
+                    <span>{file.name}</span>
+                    <span className="column-count">{headers.length} columns</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {file && headers.length > 0 && (
+              <div className="card">
+                <h3>
+                  <span className="step-icon">3</span>
+                  Column Mapping
+                </h3>
+                <div className="column-mapper">
+                  <label>
+                    Prediction column
+                    <select value={predictionColumn} onChange={(e) => setPredictionColumn(e.target.value)}>
+                      {headers.map((header) => (
+                        <option key={header} value={header}>{header}</option>
+                      ))}
+                    </select>
+                    <span className="field-hint">Column containing model predictions (0-1 scores)</span>
+                  </label>
+                  <label>
+                    Ground truth column (optional)
+                    <select value={groundTruthColumn} onChange={(e) => setGroundTruthColumn(e.target.value)}>
+                      <option value="">Not provided</option>
+                      {headers.map((header) => (
+                        <option key={header} value={header}>{header}</option>
+                      ))}
+                    </select>
+                    <span className="field-hint">Actual labels for metrics requiring ground truth</span>
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="step-actions">
+            <button 
+              type="button" 
+              className="btn-primary" 
+              disabled={!canProceedToStep2}
+              onClick={() => setStep(2)}
+            >
+              Continue to Attributes
+            </button>
           </div>
         </div>
 
-        {error ? <p className="error">{error}</p> : null}
-        <button type="submit">Submit Audit</button>
+        {/* Step 2: Protected Attributes */}
+        <div className={`form-step ${step === 2 ? "active" : "inactive"}`}>
+          <div className="step-content">
+            <div className="card">
+              <h3>Protected Attributes</h3>
+              <p className="step-description">Define the demographic attributes to test for fairness.</p>
+              
+              <div className="attributes-list">
+                {attributes.map((attribute, index) => (
+                  <div key={index} className="attribute-config">
+                    <div className="attribute-field">
+                      <label>Column</label>
+                      <select
+                        value={attribute.name}
+                        onChange={(e) => {
+                          const next = [...attributes];
+                          next[index].name = e.target.value;
+                          setAttributes(next);
+                        }}
+                      >
+                        {headers.map((header) => (
+                          <option key={header} value={header}>{header}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="attribute-field">
+                      <label>Privileged Group</label>
+                      <input
+                        placeholder="e.g., Male"
+                        value={attribute.privileged_group}
+                        onChange={(e) => {
+                          const next = [...attributes];
+                          next[index].privileged_group = e.target.value;
+                          setAttributes(next);
+                        }}
+                      />
+                    </div>
+                    <div className="attribute-field">
+                      <label>Unprivileged Group</label>
+                      <input
+                        placeholder="e.g., Female"
+                        value={attribute.unprivileged_group}
+                        onChange={(e) => {
+                          const next = [...attributes];
+                          next[index].unprivileged_group = e.target.value;
+                          setAttributes(next);
+                        }}
+                      />
+                    </div>
+                    {attributes.length > 1 && (
+                      <button 
+                        type="button" 
+                        className="btn-remove"
+                        onClick={() => setAttributes(prev => prev.filter((_, i) => i !== index))}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                type="button" 
+                className="btn-add"
+                onClick={() => setAttributes((prev) => [...prev, { name: headers[0] ?? "", type: "categorical", privileged_group: "", unprivileged_group: "" }])}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Attribute
+              </button>
+            </div>
+          </div>
+
+          <div className="step-actions">
+            <button type="button" className="btn-secondary" onClick={() => setStep(1)}>Back</button>
+            <button 
+              type="button" 
+              className="btn-primary" 
+              disabled={!canProceedToStep3}
+              onClick={() => setStep(3)}
+            >
+              Continue to Metrics
+            </button>
+          </div>
+        </div>
+
+        {/* Step 3: Metrics */}
+        <div className={`form-step ${step === 3 ? "active" : "inactive"}`}>
+          <div className="step-content">
+            <div className="card">
+              <h3>Select Metrics</h3>
+              <p className="step-description">Choose the fairness metrics to compute.</p>
+              
+              <div className="metrics-selection">
+                {metrics.map((metric) => (
+                  <label key={metric.name} className={`metric-option ${selectedMetrics.includes(metric.name) ? "selected" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedMetrics.includes(metric.name)}
+                      onChange={(e) => {
+                        setSelectedMetrics((prev) =>
+                          e.target.checked ? [...prev, metric.name] : prev.filter((name) => name !== metric.name)
+                        );
+                      }}
+                    />
+                    <div className="metric-content">
+                      <span className="metric-name">{metric.display_name}</span>
+                      <span className="metric-desc">{metric.description}</span>
+                      {metric.requires_ground_truth && (
+                        <span className="metric-tag">Requires ground truth</span>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="step-actions">
+            <button type="button" className="btn-secondary" onClick={() => setStep(2)}>Back</button>
+            <button 
+              type="submit" 
+              className="btn-primary btn-submit" 
+              disabled={!canSubmit || isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Run Audit"}
+            </button>
+          </div>
+        </div>
+
+        {error && <div className="form-error">{error}</div>}
       </form>
     </section>
   );
