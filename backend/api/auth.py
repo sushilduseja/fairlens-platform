@@ -5,16 +5,36 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.audit_log import log_action
-from backend.core.security import create_access_token, generate_api_key, hash_password, verify_password
+from backend.core.security import (
+    create_access_token,
+    generate_api_key,
+    hash_password,
+    verify_password,
+    get_current_user,
+)
 from backend.db.models import User
 from backend.db.session import get_db
-from backend.schemas.schemas import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UserBrief
+from backend.schemas.schemas import (
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    RegisterResponse,
+    UserBrief,
+)
 
 router = APIRouter()
 
 
+@router.get("/me")
+async def get_me(current_user: User = Depends(get_current_user)) -> UserBrief:
+    """Get current authenticated user."""
+    return UserBrief(id=current_user.id, email=current_user.email, name=current_user.name)
+
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
-async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db)) -> RegisterResponse:
+async def register(
+    payload: RegisterRequest, db: AsyncSession = Depends(get_db)
+) -> RegisterResponse:
     existing = await db.execute(select(User).where(User.email == payload.email))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(status_code=409, detail="Email already registered.")
@@ -29,7 +49,9 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db))
     )
     db.add(user)
     await db.flush()
-    await log_action(db, "user.registered", "User", user.id, user=user, details={"email": user.email})
+    await log_action(
+        db, "user.registered", "User", user.id, user=user, details={"email": user.email}
+    )
     await db.refresh(user)
     return RegisterResponse(user_id=user.id, api_key=user.api_key)
 
@@ -42,7 +64,11 @@ async def login(
 ) -> LoginResponse:
     result = await db.execute(select(User).where(User.email == payload.email))
     user = result.scalar_one_or_none()
-    if user is None or not verify_password(payload.password, user.hashed_password) or not user.is_active:
+    if (
+        user is None
+        or not verify_password(payload.password, user.hashed_password)
+        or not user.is_active
+    ):
         raise HTTPException(status_code=401, detail="Invalid credentials.")
 
     token = create_access_token(user.id)

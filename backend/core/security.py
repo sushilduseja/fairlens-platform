@@ -48,15 +48,28 @@ async def get_current_user(
     session_token: str | None = Cookie(default=None),
 ) -> User:
     api_key: str | None = None
+    bearer_token: str | None = None
+
     if authorization:
         scheme, _, token = authorization.partition(" ")
         if scheme.lower() == "bearer" and token:
-            api_key = token
+            # Check if it looks like a JWT (has two dots) - treat as session token
+            # Otherwise treat as API key
+            if token.count(".") == 2:
+                bearer_token = token
+            else:
+                api_key = token
 
     user: User | None = None
-    if api_key:
+
+    # First try session token (JWT)
+    if bearer_token:
+        user = await _get_user_by_session_token(db, bearer_token)
+    # Then try API key
+    if user is None and api_key:
         user = await _get_user_by_api_key(db, api_key)
-    elif session_token:
+    # Finally try session cookie
+    if user is None and session_token:
         user = await _get_user_by_session_token(db, session_token)
 
     if user is None or not user.is_active:

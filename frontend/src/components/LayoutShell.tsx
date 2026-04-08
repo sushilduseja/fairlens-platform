@@ -1,10 +1,14 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 
+import { useAuth } from "../hooks/useAuth";
+
 function linkClass(isActive: boolean) {
   return `nav-link${isActive ? " active" : ""}`;
 }
 
 export function LayoutShell() {
+  const { user, logout } = useAuth();
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -47,6 +51,12 @@ export function LayoutShell() {
         </nav>
         
         <div className="sidebar-footer">
+          <div className="user-info">
+            <span className="user-email">{user?.email}</span>
+            <button onClick={logout} className="logout-btn">
+              Sign out
+            </button>
+          </div>
           <div className="version-badge">v0.1.0</div>
         </div>
       </aside>

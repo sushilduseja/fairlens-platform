@@ -1,30 +1,35 @@
-import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { FormEvent, useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import { apiFetch } from "../hooks/useApi";
-
-type LoginResponse = {
-  session_token: string;
-  user: { id: string; email: string; name: string };
-};
+import { useAuth } from "../hooks/useAuth";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const from = (location.state as { from?: Location })?.from?.pathname || "/";
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate, from]);
+
+  if (authLoading) {
+    return <div className="auth-page"><div className="auth-container">Loading...</div></div>;
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setIsLoading(true);
     try {
-      await apiFetch<LoginResponse>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-      setError(null);
-      navigate("/");
+      await login(email, password);
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

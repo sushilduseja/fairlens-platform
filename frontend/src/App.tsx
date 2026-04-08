@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { LayoutShell } from "./components/LayoutShell";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuditDetailPage } from "./pages/AuditDetailPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -13,13 +14,19 @@ export function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route element={<LayoutShell />}>
+      <Route
+        element={
+          <ProtectedRoute>
+            <LayoutShell />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/" element={<DashboardPage />} />
         <Route path="/audits/new" element={<NewAuditPage />} />
         <Route path="/audits/:id" element={<AuditDetailPage />} />
         <Route path="/metrics" element={<MetricReferencePage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

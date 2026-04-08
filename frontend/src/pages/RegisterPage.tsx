@@ -1,7 +1,8 @@
 import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../hooks/useApi";
+import { useAuth } from "../hooks/useAuth";
 
 type RegisterResponse = {
   user_id: string;
@@ -9,6 +10,8 @@ type RegisterResponse = {
 };
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,13 +27,21 @@ export function RegisterPage() {
         method: "POST",
         body: JSON.stringify({ name, email, password }),
       });
-      localStorage.setItem("fairlens_api_key", response.api_key);
       setApiKey(response.api_key);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleContinue() {
+    try {
+      await login(email, password);
+      navigate("/");
+    } catch {
+      navigate("/login");
     }
   }
 
@@ -75,9 +86,9 @@ export function RegisterPage() {
               </button>
             </div>
             
-            <Link to="/" className="btn-primary btn-full">
+            <button onClick={handleContinue} className="btn-primary btn-full">
               Go to Dashboard
-            </Link>
+            </button>
           </div>
         ) : (
           <form className="auth-form" onSubmit={onSubmit}>

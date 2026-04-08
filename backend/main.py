@@ -2,10 +2,9 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from backend.api.audit_log_middleware import AuditLogMiddleware
 from backend.api.router import api_router
@@ -32,15 +31,35 @@ def create_app() -> FastAPI:
 
     static_dir = Path(settings.STATIC_DIR)
     static_dir.mkdir(parents=True, exist_ok=True)
-    app.mount("/assets", StaticFiles(directory=static_dir), name="assets")
-
-    @app.get("/{path:path}")
-    async def serve_spa(path: str):
-        return HTMLResponse(content=(static_dir / "index.html").read_text(), media_type="text/html")
+    assets_dir = static_dir / "assets"
+    assets_dir.mkdir(parents=True, exist_ok=True)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/assets/{file_path:path}")
+    async def serve_assets(file_path: str):
+        full_path = assets_dir / file_path
+        if not full_path.is_file():
+            raise HTTPException(status_code=404, detail="Not found")
+
+        resolved = full_path.resolve()
+        if not resolved.is_relative_to(assets_dir.resolve()):
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+        return FileResponse(full_path)
+
+    @app.get("/{path:path}", include_in_schema=False)
+    async def serve_spa(path: str):
+        if path.startswith("api"):
+            raise HTTPException(status_code=404, detail="Not found")
+
+        index_file = static_dir / "index.html"
+        if index_file.is_file():
+            return HTMLResponse(content=index_file.read_text(), media_type="text/html")
+
+        raise HTTPException(status_code=404, detail="Not found")
 
     @app.on_event("startup")
     async def startup_event() -> None:

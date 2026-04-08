@@ -1,5 +1,12 @@
 import { API_BASE } from "../utils/constants";
 
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem("fairlens_api_key");
   const headers = new Headers(init?.headers ?? {});
@@ -16,6 +23,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     ...init,
     headers,
   });
+
+  if (response.status === 401) {
+    localStorage.removeItem('fairlens_api_key');
+    window.dispatchEvent(new CustomEvent('auth:logout'));
+    throw new AuthError('Authentication required');
+  }
 
   if (!response.ok) {
     const message = await response.text();
