@@ -15,6 +15,7 @@ export type AuditSummary = {
   status: string;
   overall_verdict: string | null;
   created_at: string;
+  groq_enriched: boolean;
 };
 
 export type AuditListResponse = {
@@ -44,6 +45,7 @@ export type Recommendation = {
   priority: string;
   issue: string;
   mitigation_strategy: string;
+  mitigation_strategy_enriched: string | null;
   implementation_effort: string;
 };
 
@@ -58,6 +60,8 @@ export type AuditDetail = {
   error_message: string | null;
   started_at: string | null;
   completed_at: string | null;
+  narrative_summary: string | null;
+  groq_enriched: boolean;
 };
 
 export type ModelCreateResponse = {

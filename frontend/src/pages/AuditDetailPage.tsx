@@ -36,6 +36,7 @@ export function AuditDetailPage() {
   }
 
   const isProcessing = audit.status === "queued" || audit.status === "processing";
+  const showNarrative = audit.narrative_summary && !isProcessing;
 
   return (
     <section className="audit-detail">
@@ -55,8 +56,23 @@ export function AuditDetailPage() {
           {audit.overall_verdict && !isProcessing && (
             <StatusBadge value={audit.overall_verdict} large />
           )}
+          {audit.groq_enriched && (
+            <span className="ai-badge">AI-Enhanced</span>
+          )}
         </div>
       </div>
+
+      {/* Narrative Summary */}
+      {showNarrative && (
+        <div className="narrative-card animate-in" style={{animationDelay: "50ms"}}>
+          <h3>Executive Summary</h3>
+          <div className="narrative-content">
+            {audit.narrative_summary.split('\n\n').map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Processing State */}
       {isProcessing && (
@@ -159,7 +175,9 @@ export function AuditDetailPage() {
                   <span className="effort-tag">{item.implementation_effort}</span>
                 </div>
                 <h4>{item.issue}</h4>
-                <p className="mitigation">{item.mitigation_strategy}</p>
+                <p className="mitigation">
+                  {item.mitigation_strategy_enriched ?? item.mitigation_strategy}
+                </p>
               </div>
             ))}
           </div>

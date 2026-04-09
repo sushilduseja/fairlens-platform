@@ -725,6 +725,66 @@ td {
   gap: 0.75rem;
 }
 
+/* AI Badge */
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.65rem;
+  background: linear-gradient(135deg, var(--violet-bg), rgba(139, 92, 246, 0.15));
+  color: var(--violet);
+  border: 1px solid var(--violet);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ai-badge-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.4rem;
+  background: var(--violet-bg);
+  color: var(--violet);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.audit-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Narrative Card */
+.narrative-card {
+  padding: 1.5rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.narrative-card h3 {
+  font-size: 1rem;
+  margin: 0 0 1rem;
+  color: var(--accent);
+}
+
+.narrative-content p {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.narrative-content p:last-child {
+  margin-bottom: 0;
+}
+
 /* Processing State */
 .processing-card {
   display: flex;

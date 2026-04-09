@@ -160,12 +160,15 @@ export function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="audit-cards">
+            <div className="audit-cards">
             {audits.map((audit) => (
               <Link key={audit.audit_id} to={`/audits/${audit.audit_id}`} className="audit-card">
                 <div className="audit-card-main">
                   <span className="audit-model">{audit.model_name}</span>
-                  <StatusBadge value={audit.overall_verdict} large />
+                  <div className="audit-card-badges">
+                    {audit.groq_enriched && <span className="ai-badge-small">AI</span>}
+                    <StatusBadge value={audit.overall_verdict} large />
+                  </div>
                 </div>
                 <div className="audit-card-meta">
                   <StatusBadge value={audit.status} />
