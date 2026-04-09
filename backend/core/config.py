@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     # ── Paths ────────────────────────────────────────────────────────────
     STATIC_DIR: str = "./static"
 
+    # ── Groq LLM ─────────────────────────────────────────────────────────
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_TIMEOUT_SECONDS: int = 30
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @property

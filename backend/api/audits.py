@@ -115,6 +115,8 @@ async def get_audit(
         error_message=audit.error_message,
         started_at=audit.started_at,
         completed_at=audit.completed_at,
+        narrative_summary=audit.narrative_summary,
+        groq_enriched=audit.groq_enriched,
     )
 
 
@@ -129,7 +131,9 @@ async def list_audits(
     per_page = min(max(per_page, 1), 100)
     offset = (page - 1) * per_page
 
-    total_query = await db.execute(select(func.count()).select_from(Audit).where(Audit.user_id == current_user.id))
+    total_query = await db.execute(
+        select(func.count()).select_from(Audit).where(Audit.user_id == current_user.id)
+    )
     total = int(total_query.scalar_one())
 
     rows = await db.execute(
@@ -149,6 +153,7 @@ async def list_audits(
             status=audit.status,
             overall_verdict=audit.overall_verdict,
             created_at=audit.created_at,
+            groq_enriched=audit.groq_enriched,
         )
         for audit, model_name in rows.all()
     ]
@@ -178,6 +183,7 @@ def _map_recommendation(item: Recommendation) -> RecommendationResponse:
         priority=item.priority,
         issue=item.issue,
         mitigation_strategy=item.mitigation_strategy,
+        mitigation_strategy_enriched=item.mitigation_strategy_enriched,
         implementation_effort=item.implementation_effort,
     )
 
@@ -198,23 +204,31 @@ def _parse_protected_attributes(raw: str) -> list[ProtectedAttributeConfig]:
         parsed = json.loads(raw)
         return [ProtectedAttributeConfig.model_validate(item) for item in parsed]
     except Exception as exc:
-        raise HTTPException(status_code=422, detail=f"Invalid protected_attributes payload: {exc}") from exc
+        raise HTTPException(
+            status_code=422, detail=f"Invalid protected_attributes payload: {exc}"
+        ) from exc
 
 
 def _parse_selected_metrics(raw: str) -> list[str]:
     try:
         parsed = json.loads(raw)
     except Exception as exc:
-        raise HTTPException(status_code=422, detail=f"Invalid selected_metrics payload: {exc}") from exc
+        raise HTTPException(
+            status_code=422, detail=f"Invalid selected_metrics payload: {exc}"
+        ) from exc
     if not isinstance(parsed, list) or not parsed:
-        raise HTTPException(status_code=422, detail="selected_metrics must be a non-empty JSON array.")
+        raise HTTPException(
+            status_code=422, detail="selected_metrics must be a non-empty JSON array."
+        )
     unknown = [name for name in parsed if name not in METRIC_CATALOG]
     if unknown:
         raise HTTPException(status_code=422, detail=f"Unknown metrics: {', '.join(unknown)}.")
     return [str(name) for name in parsed]
 
 
-def _validate_ground_truth_requirements(selected_metrics: list[str], ground_truth_column: str | None) -> None:
+def _validate_ground_truth_requirements(
+    selected_metrics: list[str], ground_truth_column: str | None
+) -> None:
     requires_truth = any(METRIC_CATALOG[m]["requires_ground_truth"] for m in selected_metrics)
     if requires_truth and not ground_truth_column:
         raise HTTPException(
@@ -257,8 +271,12 @@ def _validate_csv_columns(
         )
 
     if not pd.api.types.is_numeric_dtype(frame[prediction_column]):
-        raise HTTPException(status_code=422, detail=f"prediction_column '{prediction_column}' must be numeric.")
+        raise HTTPException(
+            status_code=422, detail=f"prediction_column '{prediction_column}' must be numeric."
+        )
     if ground_truth_column and not pd.api.types.is_numeric_dtype(frame[ground_truth_column]):
-        raise HTTPException(status_code=422, detail=f"ground_truth_column '{ground_truth_column}' must be numeric.")
+        raise HTTPException(
+            status_code=422, detail=f"ground_truth_column '{ground_truth_column}' must be numeric."
+        )
 
     return int(len(frame))

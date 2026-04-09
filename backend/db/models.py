@@ -29,6 +29,7 @@ def _now() -> datetime:
 
 # ── User ────────────────────────────────────────────────────────────────────
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -45,11 +46,16 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    models: Mapped[list["Model"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
-    audits: Mapped[list["Audit"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    models: Mapped[list["Model"]] = relationship(
+        back_populates="owner", cascade="all, delete-orphan"
+    )
+    audits: Mapped[list["Audit"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 # ── Model ───────────────────────────────────────────────────────────────────
+
 
 class Model(Base):
     __tablename__ = "models"
@@ -58,18 +64,27 @@ class Model(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     use_case: Mapped[str] = mapped_column(
-        Enum("credit_approval", "fraud_detection", "underwriting", "insurance", "other",
-             name="model_use_case"),
+        Enum(
+            "credit_approval",
+            "fraud_detection",
+            "underwriting",
+            "insurance",
+            "other",
+            name="model_use_case",
+        ),
         nullable=False,
     )
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     owner: Mapped["User"] = relationship(back_populates="models")
-    audits: Mapped[list["Audit"]] = relationship(back_populates="model", cascade="all, delete-orphan")
+    audits: Mapped[list["Audit"]] = relationship(
+        back_populates="model", cascade="all, delete-orphan"
+    )
 
 
 # ── Audit ───────────────────────────────────────────────────────────────────
+
 
 class Audit(Base):
     __tablename__ = "audits"
@@ -97,6 +112,9 @@ class Audit(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
+    narrative_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    groq_enriched: Mapped[bool] = mapped_column(default=False, nullable=False)
+
     model: Mapped["Model"] = relationship(back_populates="audits")
     user: Mapped["User"] = relationship(back_populates="audits")
     results: Mapped[list["FairnessResult"]] = relationship(
@@ -109,6 +127,7 @@ class Audit(Base):
 
 # ── FairnessResult ──────────────────────────────────────────────────────────
 
+
 class FairnessResult(Base):
     __tablename__ = "fairness_results"
 
@@ -120,9 +139,7 @@ class FairnessResult(Base):
     unprivileged_value: Mapped[float] = mapped_column(Float, nullable=False)
     disparity: Mapped[float] = mapped_column(Float, nullable=False)
     threshold: Mapped[float] = mapped_column(Float, nullable=False)
-    status: Mapped[str] = mapped_column(
-        Enum("PASS", "FAIL", name="result_status"), nullable=False
-    )
+    status: Mapped[str] = mapped_column(Enum("PASS", "FAIL", name="result_status"), nullable=False)
     confidence_interval_lower: Mapped[float] = mapped_column(Float, nullable=False)
     confidence_interval_upper: Mapped[float] = mapped_column(Float, nullable=False)
     p_value: Mapped[float] = mapped_column(Float, nullable=False)
@@ -134,6 +151,7 @@ class FairnessResult(Base):
 
 
 # ── Recommendation ──────────────────────────────────────────────────────────
+
 
 class Recommendation(Base):
     __tablename__ = "recommendations"
@@ -148,12 +166,14 @@ class Recommendation(Base):
     implementation_effort: Mapped[str] = mapped_column(
         Enum("low", "medium", "high", name="implementation_effort"), nullable=False
     )
+    mitigation_strategy_enriched: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     audit: Mapped["Audit"] = relationship(back_populates="recommendations")
 
 
 # ── AuditLog ────────────────────────────────────────────────────────────────
+
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"

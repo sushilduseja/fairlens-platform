@@ -11,7 +11,8 @@ from sqlalchemy import delete
 from backend.db.models import Audit, FairnessResult, Recommendation
 from backend.db.session import async_session
 from backend.engine.metrics import METRIC_FUNCTIONS, MetricResult
-from backend.engine.recommendations import generate_recommendations
+from backend.engine.recommendations import generate_recommendations, enrich_recommendations_with_llm
+from backend.engine.llm import generate_narrative_summary
 
 
 async def process_audit(ctx: dict, audit_id: str) -> None:
@@ -107,6 +108,76 @@ async def process_audit(ctx: dict, audit_id: str) -> None:
 
             audit.dataset_row_count = int(len(frame))
             audit.overall_verdict = _derive_overall_verdict([r for _, r in metric_results])
+
+            await db.flush()
+
+            results_serializable = [
+                {
+                    "metric_name": r.metric_name,
+                    "protected_attribute": attr_name,
+                    "privileged_value": r.privileged_value,
+                    "unprivileged_value": r.unprivileged_value,
+                    "disparity": r.disparity,
+                    "threshold": r.threshold,
+                    "status": r.status,
+                    "confidence_interval_lower": r.ci_lower,
+                    "confidence_interval_upper": r.ci_upper,
+                    "p_value": r.p_value,
+                    "sample_size_privileged": r.sample_size_privileged,
+                    "sample_size_unprivileged": r.sample_size_unprivileged,
+                }
+                for attr_name, r in metric_results
+            ]
+            recs_serializable = [
+                {
+                    "priority": rec["priority"],
+                    "issue": rec["issue"],
+                    "mitigation_strategy": rec["mitigation_strategy"],
+                }
+                for rec in recs
+            ]
+
+            model_name = audit.model.name if audit.model else "Unknown Model"
+            use_case = audit.model.use_case if audit.model else "unknown"
+
+            narrative = await generate_narrative_summary(
+                audit_id=audit.id,
+                model_name=model_name,
+                use_case=use_case,
+                overall_verdict=audit.overall_verdict,
+                dataset_row_count=audit.dataset_row_count,
+                results=results_serializable,
+                rule_based_recommendations=recs_serializable,
+            )
+            if narrative:
+                audit.narrative_summary = narrative
+
+            enriched_recs = await enrich_recommendations_with_llm(
+                audit_id=audit.id,
+                model_name=model_name,
+                use_case=use_case,
+                overall_verdict=audit.overall_verdict,
+                dataset_row_count=audit.dataset_row_count,
+                results=results_serializable,
+                rule_based_recommendations=recs_serializable,
+            )
+            if enriched_recs:
+                audit.groq_enriched = True
+                await db.execute(delete(Recommendation).where(Recommendation.audit_id == audit.id))
+                db.add_all(
+                    [
+                        Recommendation(
+                            audit_id=audit.id,
+                            priority=rec.get("priority", "medium"),
+                            issue=rec.get("issue", ""),
+                            mitigation_strategy=recs_serializable[i].get("mitigation_strategy", ""),
+                            mitigation_strategy_enriched=rec.get("mitigation_strategy"),
+                            implementation_effort=rec.get("implementation_effort", "medium"),
+                        )
+                        for i, rec in enumerate(enriched_recs)
+                    ]
+                )
+
             audit.status = "completed"
             audit.error_message = None
             audit.completed_at = datetime.now(timezone.utc)

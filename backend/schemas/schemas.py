@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 # ── Auth ────────────────────────────────────────────────────────────────────
 
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     name: str = Field(min_length=1, max_length=255)
@@ -36,9 +37,12 @@ class UserBrief(BaseModel):
 
 # ── Model ───────────────────────────────────────────────────────────────────
 
+
 class ModelCreateRequest(BaseModel):
     name: str = Field(min_length=1, max_length=255)
-    use_case: str = Field(pattern=r"^(credit_approval|fraud_detection|underwriting|insurance|other)$")
+    use_case: str = Field(
+        pattern=r"^(credit_approval|fraud_detection|underwriting|insurance|other)$"
+    )
     description: str | None = None
 
 
@@ -56,6 +60,7 @@ class ModelListResponse(BaseModel):
 
 # ── Protected Attribute config (nested in audit) ────────────────────────────
 
+
 class ProtectedAttributeConfig(BaseModel):
     name: str = Field(description="Column name in the CSV")
     type: str = Field(pattern=r"^(binary|categorical)$")
@@ -65,8 +70,10 @@ class ProtectedAttributeConfig(BaseModel):
 
 # ── Audit ───────────────────────────────────────────────────────────────────
 
+
 class AuditCreateMeta(BaseModel):
     """JSON metadata sent along with the file upload."""
+
     model_id: str
     prediction_column: str
     ground_truth_column: str | None = None
@@ -100,6 +107,7 @@ class RecommendationResponse(BaseModel):
     priority: str
     issue: str
     mitigation_strategy: str
+    mitigation_strategy_enriched: str | None = None
     implementation_effort: str
 
 
@@ -113,6 +121,8 @@ class AuditDetailResponse(BaseModel):
     error_message: str | None
     started_at: datetime | None
     completed_at: datetime | None
+    narrative_summary: str | None = None
+    groq_enriched: bool = False
 
 
 class AuditSummary(BaseModel):
@@ -122,6 +132,7 @@ class AuditSummary(BaseModel):
     status: str
     overall_verdict: str | None
     created_at: datetime
+    groq_enriched: bool = False
 
 
 class AuditListResponse(BaseModel):
@@ -132,6 +143,7 @@ class AuditListResponse(BaseModel):
 
 
 # ── Metrics catalog ─────────────────────────────────────────────────────────
+
 
 class MetricInfo(BaseModel):
     name: str
@@ -148,6 +160,7 @@ class MetricCatalogResponse(BaseModel):
 
 
 # ── Generic ─────────────────────────────────────────────────────────────────
+
 
 class ErrorResponse(BaseModel):
     error: str

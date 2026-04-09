@@ -1,52 +1,26 @@
-# FairLens MVP - Phase 1 Build Tasks
+# Groq LLM Integration — Task Tracker
 
-## Backend Foundation
-- [x] Initialize Python project (pyproject.toml, dependencies)
-- [x] FastAPI app entry point with CORS, static file serving
-- [x] Core config (settings, database URL, Redis URL)
-- [x] SQLAlchemy models for all 6 entities
-- [x] Alembic migration setup
-- [x] Pydantic schemas (request/response models)
-- [x] Auth utilities (API key generation, password hashing, dependency injection)
-- [x] Structured error handling middleware
+## Ship 1: Groq Client + Config
+- [ ] Add GROQ_* settings to config.py
+- [ ] Add httpx to pyproject.toml main deps
+- [ ] Create backend/engine/llm.py (client singleton, prompt dispatcher, failure handling)
 
-## Fairness Engine
-- [x] Statistical testing framework (bootstrap CI, permutation test)
-- [x] Demographic parity metric
-- [x] Equalized odds metric
-- [x] Calibration metric
-- [x] Predictive equality metric
-- [x] Result interpretation (rule-based plain-language)
-- [x] Recommendation generator (rule-based per failure mode)
+## Ship 2: Schema Migration
+- [ ] Add narrative_summary + groq_enriched to Audit model
+- [ ] Add mitigation_strategy_enriched to Recommendation model
+- [ ] Create Alembic migration
+- [ ] Add new fields to Pydantic response schemas
 
-## API Routes
-- [x] POST /api/v1/auth/register
-- [x] POST /api/v1/auth/login (cookie/session)
-- [x] POST /api/v1/models
-- [x] POST /api/v1/audits (multipart file upload)
-- [x] GET /api/v1/audits/{audit_id}
-- [x] GET /api/v1/audits (list, paginated)
-- [x] GET /api/v1/metrics (catalog)
-- [x] AuditLog middleware for state-changing endpoints
+## Ship 3: Worker Integration
+- [ ] Add enrich_recommendations_with_llm() to recommendations.py
+- [ ] Add LLM enrichment block to worker.py (intermediate flush, Groq calls, fallback)
 
-## Job Queue
-- [x] ARQ worker setup with Redis
-- [x] Audit processing task (validate -> compute -> store)
-- [x] File cleanup after processing
+## Ship 4: API + Frontend
+- [ ] Update api/audits.py mappers to include new fields
+- [ ] Update AuditDetail page (narrative panel, enriched recs, AI badge)
+- [ ] Update Dashboard (groq_enriched badge)
 
-## Frontend
-- [x] Vite + React + TypeScript project init
-- [x] Design system (tokens, global CSS, fonts)
-- [x] Auth pages (Register, Login)
-- [x] Dashboard page (audit list table)
-- [x] New Audit page (model selector, file upload, column mapper, attribute config, metric selector)
-- [x] Audit Detail / Results page (verdict, results table, recommendations, status polling)
-- [x] Metric Reference page
-- [x] API client hooks (fetch wrapper, polling)
-- [x] Layout shell (nav, sidebar)
-
-## Integration
-- [x] Dockerfile (multi-stage: build frontend, serve with uvicorn)
-- [x] docker-compose.yml (app + Redis)
-- [x] Sample datasets (bundled CSVs)
-- [x] README with setup instructions
+## Ship 5: Metric Wizard
+- [ ] Create rule-based metric recommendation function
+- [ ] Add POST /api/v1/metrics/recommend endpoint with Groq augmentation
+- [ ] Create MetricWizard frontend page
