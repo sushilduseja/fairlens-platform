@@ -6,16 +6,41 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: sqlite+aiosqlite:///./fairlens.db
+      DATABASE_URL: sqlite+aiosqlite:////app/data/fairlens.db
       REDIS_URL: redis://redis:6379
-      UPLOAD_DIR: ./uploads
+      UPLOAD_DIR: /app/data/uploads
       STATIC_DIR: ./static
       SECRET_KEY: dev-only-secret-change-me
+    volumes:
+      - fairlens-data:/app/data
     depends_on:
-      - redis
-    volumes: []
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "python -c \"from arq import Worker; from arq.connections import RedisSettings; from backend.jobs.worker import process_audit; w = Worker(functions=[process_audit], redis_settings=RedisSettings.from_dsn('redis://redis:6379'), max_jobs=1); w.run()\""
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////app/data/fairlens.db
+      REDIS_URL: redis://redis:6379
+      UPLOAD_DIR: /app/data/uploads
+    volumes:
+      - fairlens-data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  fairlens-data:

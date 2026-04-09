@@ -17,9 +17,10 @@ COPY backend ./backend
 COPY alembic.ini ./alembic.ini
 COPY sample-data ./sample-data
 COPY pyproject.toml ./pyproject.toml
+RUN mkdir -p ./data ./uploads
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir .
+    pip install --no-cache-dir . asyncpg
 
 # Force rebuild - copy static files
 COPY --from=frontend-build /app/frontend/dist /app/static
