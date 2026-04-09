@@ -62,7 +62,7 @@ export function LayoutShell() {
           <div className="version-badge">v0.1.0</div>
         </div>
       </aside>
-      <main id="main-content" className="content">
+      <main id="main-content" className="content" role="main">
         <Outlet />
       </main>
     </div>
