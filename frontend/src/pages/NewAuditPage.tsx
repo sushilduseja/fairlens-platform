@@ -117,13 +117,13 @@ export function NewAuditPage() {
 
   return (
     <section className="new-audit">
-      <div className="new-audit-header">
+      <div className="new-audit-header animate-in">
         <h2>New Audit</h2>
         <p>Configure and run a fairness audit on your model predictions.</p>
       </div>
 
       {/* Step Indicator */}
-      <div className="step-indicator">
+      <div className="step-indicator animate-in" style={{animationDelay: "50ms"}}>
         <div className={`step ${step >= 1 ? "active" : ""} ${step > 1 ? "completed" : ""}`}>
           <span className="step-number">1</span>
           <span className="step-label">Model & Data</span>
@@ -166,9 +166,9 @@ export function NewAuditPage() {
                       value={newModelName} 
                       onChange={(e) => setNewModelName(e.target.value)} 
                       placeholder="e.g., Credit Scoring v3.1"
-                      className={modelNameInvalid ? "input-error" : ""}
+                      className={newModelName.trim() === "" && newModelName.length > 0 ? "input-error" : ""}
                     />
-                    {modelNameInvalid && <span className="field-error">Model name is required</span>}
+                    {newModelName.trim() === "" && newModelName.length > 0 && <span className="field-error">Model name is required</span>}
                   </label>
                   <label>
                     Use case
@@ -345,7 +345,7 @@ export function NewAuditPage() {
               <h3>Select Metrics</h3>
               <p className="step-description">Choose the fairness metrics to compute.</p>
               
-              <div className="metrics-selection">
+              <div className="metrics-selection animate-in-stagger">
                 {metrics.map((metric) => (
                   <label key={metric.name} className={`metric-option ${selectedMetrics.includes(metric.name) ? "selected" : ""}`}>
                     <input

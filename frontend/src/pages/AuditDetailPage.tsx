@@ -93,7 +93,7 @@ export function AuditDetailPage() {
       )}
 
       {/* Dataset Info */}
-      <div className="info-grid">
+      <div className="info-grid animate-in" style={{animationDelay: "100ms"}}>
         <div className="info-card">
           <span className="info-label">Dataset Rows</span>
           <span className="info-value">{audit.dataset_row_count?.toLocaleString() ?? "-"}</span>
@@ -114,7 +114,7 @@ export function AuditDetailPage() {
 
       {/* Metric Results Table */}
       {audit.results.length > 0 && (
-        <div className="results-section">
+        <div className="results-section animate-in" style={{animationDelay: "150ms"}}>
           <h3>Metric Results</h3>
           <div className="card table-card">
             <table>
@@ -128,7 +128,7 @@ export function AuditDetailPage() {
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="animate-in-stagger">
                 {audit.results.map((result, index) => (
                   <tr key={`${result.metric_name}-${result.protected_attribute}-${index}`}>
                     <td className="metric-name">{result.metric_name}</td>
@@ -149,9 +149,9 @@ export function AuditDetailPage() {
 
       {/* Recommendations */}
       {audit.recommendations.length > 0 && (
-        <div className="recommendations-section">
+        <div className="recommendations-section animate-in" style={{animationDelay: "200ms"}}>
           <h3>Recommendations</h3>
-          <div className="recommendations-list">
+          <div className="recommendations-list animate-in-stagger">
             {audit.recommendations.map((item, index) => (
               <div key={`${item.issue}-${index}`} className="recommendation-card">
                 <div className="recommendation-header">
@@ -168,7 +168,7 @@ export function AuditDetailPage() {
 
       {/* No Recommendations */}
       {audit.overall_verdict === "PASS" && audit.recommendations.length === 0 && !isProcessing && (
-        <div className="success-state">
+        <div className="success-state animate-in" style={{animationDelay: "200ms"}}>
           <div className="success-icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>

@@ -48,7 +48,7 @@ export function FileUploader({ onFileSelected }: Props) {
   return (
     <div className="file-uploader">
       <div 
-        className={`upload-zone ${isDragging ? "dragging" : ""}`}
+        className={`upload-zone ${isDragging ? "dragging" : ""} animate-in`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
