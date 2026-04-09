@@ -10,6 +10,15 @@
   --warn: #92400e;
   --ok: #065f46;
   --border: #d8cdb8;
+  --info: #1e3a8a;
+  --info-bg: #dbeafe;
+  --violet: #4338ca;
+  --violet-bg: #e0e7ff;
+  --code-bg: #1e1c19;
+  --code-text: #22c55e;
+  --code-border: #475569;
+  --code-muted: #94a3b8;
+  --code-hover: #334155;
   --shadow: 0 12px 30px rgba(40, 33, 20, 0.08);
   --radius: 14px;
   --radius-sm: 8px;

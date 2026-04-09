@@ -2,6 +2,21 @@
   box-sizing: border-box;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 100;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -51,6 +66,16 @@ button:hover,
   background: var(--accent-strong);
 }
 
+button:focus,
+.button-link:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 input,
 select,
 textarea {
@@ -75,7 +100,7 @@ label {
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #fdf8ef, #f3eadc);
+  background: var(--surface-elevated);
   border-right: 1px solid var(--border);
   padding: 1.5rem 1rem;
 }
@@ -135,12 +160,12 @@ label {
 
 .sidebar-nav .nav-link:hover {
   color: var(--text);
-  background: #ebe2d4;
+  background: var(--surface);
 }
 
 .sidebar-nav .nav-link.active {
   color: var(--text);
-  background: #ebe2d4;
+  background: var(--surface);
   font-weight: 600;
 }
 
@@ -265,49 +290,44 @@ td {
 
 .badge-pass,
 .badge-completed {
-  background: #dcfce7;
+  background: var(--surface-elevated);
   color: var(--ok);
-  border-color: #86efac;
+  border-color: var(--ok);
 }
 
 .badge-conditional_pass,
 .badge-processing {
-  background: #fef3c7;
+  background: var(--surface-elevated);
   color: var(--warn);
-  border-color: #fcd34d;
+  border-color: var(--warn);
 }
 
 .badge-fail,
 .badge-failed {
-  background: #ffe4e6;
+  background: var(--surface-elevated);
   color: var(--danger);
-  border-color: #fda4af;
+  border-color: var(--danger);
 }
 
 .badge-queued {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border-color: #93c5fd;
+  background: var(--surface-elevated);
+  color: var(--info);
+  border-color: var(--info);
 }
 
 .badge-high {
-  background: #ffe4e6;
+  background: var(--surface-elevated);
   color: var(--danger);
 }
 
 .badge-medium {
-  background: #fef3c7;
+  background: var(--surface-elevated);
   color: var(--warn);
 }
 
 .badge-low {
-  background: #e0f2fe;
-  color: #0c4a6e;
-}
-
-.badge-large {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.9rem;
+  background: var(--surface-elevated);
+  color: var(--info);
 }
 
 .error {
@@ -315,8 +335,8 @@ td {
 }
 
 .ok-box {
-  background: #dcfce7;
-  border: 1px solid #86efac;
+  background: var(--surface-elevated);
+  border: 1px solid var(--ok);
   border-radius: var(--radius-sm);
   padding: 0.65rem;
 }
@@ -334,7 +354,7 @@ td {
 }
 
 .tabs button {
-  background: #e9dfd0;
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -484,22 +504,22 @@ td {
 }
 
 .kpi-icon.total {
-  background: #e0e7ff;
-  color: #4338ca;
+  background: var(--violet-bg);
+  color: var(--violet);
 }
 
 .kpi-icon.pass {
-  background: #dcfce7;
+  background: var(--surface-elevated);
   color: var(--ok);
 }
 
 .kpi-icon.pending {
-  background: #fef3c7;
+  background: var(--surface-elevated);
   color: var(--warn);
 }
 
 .kpi-icon.fail {
-  background: #ffe4e6;
+  background: var(--surface-elevated);
   color: var(--danger);
 }
 
@@ -524,8 +544,8 @@ td {
 
 /* Error Banner */
 .error-banner {
-  background: #ffe4e6;
-  border: 1px solid #fda4af;
+  background: var(--surface-elevated);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-sm);
   color: var(--danger);
   padding: 0.75rem 1rem;
@@ -710,8 +730,8 @@ td {
   align-items: flex-start;
   gap: 1rem;
   padding: 1.5rem;
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
+  background: var(--surface-elevated);
+  border: 1px solid var(--warn);
   border-radius: var(--radius);
 }
 
@@ -738,7 +758,7 @@ td {
 
 .progress-bar {
   height: 6px;
-  background: #e5e7eb;
+  background: var(--border);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -746,7 +766,7 @@ td {
 .progress-fill {
   width: 60%;
   height: 100%;
-  background: linear-gradient(90deg, var(--warn), #f59e0b);
+  background: linear-gradient(90deg, var(--warn), var(--accent));
   border-radius: 3px;
   animation: progress 2s ease-in-out infinite;
 }
@@ -763,8 +783,8 @@ td {
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  background: #ffe4e6;
-  border: 1px solid #fda4af;
+  background: var(--surface-elevated);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-sm);
 }
 
@@ -830,7 +850,7 @@ td {
 }
 
 .table-card th {
-  background: #f8fafc;
+  background: var(--surface);
   font-weight: 600;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -879,7 +899,7 @@ td {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 0.15rem 0.5rem;
-  background: #e5e7eb;
+  background: var(--surface);
   border-radius: 4px;
   color: var(--muted);
 }
@@ -903,8 +923,8 @@ td {
   align-items: center;
   text-align: center;
   padding: 3rem 2rem;
-  background: #dcfce7;
-  border: 1px solid #86efac;
+  background: var(--surface-elevated);
+  border: 1px solid var(--ok);
   border-radius: var(--radius);
 }
 
@@ -1097,8 +1117,8 @@ td {
 .file-preview {
   margin-top: 1rem;
   padding: 0.75rem;
-  background: #dcfce7;
-  border: 1px solid #86efac;
+  background: var(--surface-elevated);
+  border: 1px solid var(--ok);
   border-radius: var(--radius-sm);
 }
 
@@ -1140,7 +1160,7 @@ td {
   grid-template-columns: 1fr 1fr 1fr auto;
   gap: 0.75rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: var(--surface);
   border-radius: var(--radius-sm);
   align-items: start;
 }
@@ -1169,8 +1189,8 @@ td {
 }
 
 .btn-remove:hover {
-  background: #ffe4e6;
-  border-color: #fda4af;
+  background: var(--surface-elevated);
+  border-color: var(--danger);
 }
 
 .btn-add {
@@ -1215,7 +1235,7 @@ td {
 }
 
 .metric-option.selected {
-  background: #f0fdf4;
+  background: var(--surface-elevated);
   border-color: var(--ok);
 }
 
@@ -1242,7 +1262,7 @@ td {
   display: inline-block;
   font-size: 0.7rem;
   padding: 0.15rem 0.4rem;
-  background: #fef3c7;
+  background: var(--surface-elevated);
   color: var(--warn);
   border-radius: 4px;
   width: fit-content;
@@ -1270,7 +1290,7 @@ td {
 }
 
 .btn-secondary:hover {
-  background: #f1f5f9;
+  background: var(--surface);
 }
 
 .btn-submit {
@@ -1280,8 +1300,8 @@ td {
 .form-error {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background: #ffe4e6;
-  border: 1px solid #fda4af;
+  background: var(--surface-elevated);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-sm);
   color: var(--danger);
 }
@@ -1317,12 +1337,12 @@ td {
 
 .upload-zone:hover {
   border-color: var(--accent);
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .upload-zone.dragging {
   border-color: var(--accent);
-  background: #f0fdf4;
+  background: var(--surface-elevated);
   border-style: solid;
 }
 
@@ -1483,8 +1503,8 @@ td {
 
 .form-error {
   padding: 0.75rem 1rem;
-  background: #ffe4e6;
-  border: 1px solid #fda4af;
+  background: var(--surface-elevated);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-sm);
   color: var(--danger);
   font-size: 0.9rem;
@@ -1537,7 +1557,7 @@ td {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: #1e1c19;
+  background: var(--code-bg);
   border-radius: var(--radius-sm);
   margin-bottom: 1.5rem;
 }
@@ -1546,7 +1566,7 @@ td {
   flex: 1;
   font-family: var(--font-mono, monospace);
   font-size: 0.85rem;
-  color: #22c55e;
+  color: var(--code-text);
   word-break: break-all;
 }
 
@@ -1557,15 +1577,15 @@ td {
   width: 36px;
   height: 36px;
   background: transparent;
-  border: 1px solid #475569;
+  border: 1px solid var(--code-border);
   border-radius: 6px;
-  color: #94a3b8;
+  color: var(--code-muted);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .copy-btn:hover {
-  background: #334155;
+  background: var(--code-hover);
   color: #fff;
 }
 
@@ -1637,7 +1657,7 @@ td {
 .metric-badge {
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
-  background: #fef3c7;
+  background: var(--surface-elevated);
   color: var(--warn);
   border-radius: 4px;
   text-transform: uppercase;
@@ -1674,8 +1694,8 @@ td {
 .use-case-tag {
   font-size: 0.8rem;
   padding: 0.25rem 0.6rem;
-  background: #e0e7ff;
-  color: #4338ca;
+  background: var(--violet-bg);
+  color: var(--violet);
   border-radius: 4px;
 }
 

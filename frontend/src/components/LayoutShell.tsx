@@ -10,10 +10,12 @@ export function LayoutShell() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <Link to="/" className="brand-link">
+    <>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <div className="app-shell">
+        <aside className="sidebar" role="navigation" aria-label="Main navigation">
+          <div className="sidebar-brand">
+            <Link to="/" className="brand-link">
             <div className="brand-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -60,9 +62,10 @@ export function LayoutShell() {
           <div className="version-badge">v0.1.0</div>
         </div>
       </aside>
-      <main className="content">
+      <main id="main-content" className="content">
         <Outlet />
       </main>
     </div>
+    </>
   );
 }
