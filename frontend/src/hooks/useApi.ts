@@ -8,14 +8,10 @@ export class AuthError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = localStorage.getItem("fairlens_api_key");
   const headers = new Headers(init?.headers ?? {});
   headers.set("Accept", "application/json");
   if (!(init?.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
-  }
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
@@ -25,7 +21,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   });
 
   if (response.status === 401) {
-    localStorage.removeItem('fairlens_api_key');
     window.dispatchEvent(new CustomEvent('auth:logout'));
     throw new AuthError('Authentication required');
   }

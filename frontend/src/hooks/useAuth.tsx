@@ -33,12 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function checkAuth() {
-    const token = localStorage.getItem('fairlens_api_key');
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const response = await apiFetch<{ user: User }>('/auth/me', {
         method: 'GET',
@@ -46,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const user = response.user || response;
       setUser(user);
     } catch {
-      localStorage.removeItem('fairlens_api_key');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -57,12 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    localStorage.setItem('fairlens_api_key', response.session_token);
     setUser(response.user);
   }
 
   function logout() {
-    localStorage.removeItem('fairlens_api_key');
     setUser(null);
   }
 

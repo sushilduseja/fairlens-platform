@@ -35,10 +35,6 @@ async def get_me(current_user: User = Depends(get_current_user)) -> UserBrief:
 async def register(
     payload: RegisterRequest, db: AsyncSession = Depends(get_db)
 ) -> RegisterResponse:
-    existing = await db.execute(select(User).where(User.email == payload.email))
-    if existing.scalar_one_or_none() is not None:
-        raise HTTPException(status_code=409, detail="Email already registered.")
-
     user = User(
         email=payload.email,
         name=payload.name,
@@ -48,7 +44,12 @@ async def register(
         is_active=True,
     )
     db.add(user)
-    await db.flush()
+    try:
+        await db.flush()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered.")
+
     await log_action(
         db, "user.registered", "User", user.id, user=user, details={"email": user.email}
     )
@@ -76,8 +77,8 @@ async def login(
         key="session_token",
         value=token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=True,
+        samesite="strict",
         max_age=60 * 60 * 24,
     )
     await log_action(db, "user.login", "User", user.id, user=user)

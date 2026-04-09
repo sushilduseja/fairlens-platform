@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-me-in-production-use-openssl-rand-hex-32"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     API_KEY_PREFIX: str = "fl_"
+    CORS_ORIGINS: str = ""  # Comma-separated list, empty = same-origin only
 
     # ── File uploads ─────────────────────────────────────────────────────
     UPLOAD_DIR: str = "./uploads"
