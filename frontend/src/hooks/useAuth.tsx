@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiFetch } from '../hooks/useApi';
+import { apiFetch, AuthError } from '../hooks/useApi';
 
 type User = {
   id: string;
@@ -34,12 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function checkAuth() {
     try {
-      const response = await apiFetch<{ user: User }>('/auth/me', {
+      const response = await apiFetch<{ user?: User } | null>('/auth/me', {
         method: 'GET',
       });
-      const user = response.user || response;
-      setUser(user);
-    } catch {
+      if (response && response.user) {
+        setUser(response.user);
+      } else if (response && (response as User).id) {
+        setUser(response as unknown as User);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      if (err instanceof AuthError) {
+        // Expected when not authenticated
+      } else {
+        console.error('Auth check failed:', err);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);

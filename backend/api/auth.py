@@ -1,5 +1,7 @@
 """Auth endpoints."""
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,7 @@ from backend.core.security import (
     hash_password,
     verify_password,
     get_current_user,
+    get_current_user_optional,
 )
 from backend.db.models import User
 from backend.db.session import get_db
@@ -26,8 +29,12 @@ router = APIRouter()
 
 
 @router.get("/me")
-async def get_me(current_user: User = Depends(get_current_user)) -> UserBrief:
-    """Get current authenticated user."""
+async def get_me(
+    current_user: User | None = Depends(get_current_user_optional),
+) -> UserBrief | None:
+    """Get current authenticated user. Returns null if not authenticated."""
+    if current_user is None:
+        return None
     return UserBrief(id=current_user.id, email=current_user.email, name=current_user.name)
 
 

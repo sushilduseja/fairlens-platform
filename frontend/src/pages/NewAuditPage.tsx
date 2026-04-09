@@ -76,6 +76,12 @@ export function NewAuditPage() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    
+    if (modelNameInvalid) {
+      setError("Please enter a model name.");
+      return;
+    }
+    
     if (!file) {
       setError("Upload CSV first.");
       return;
@@ -105,8 +111,9 @@ export function NewAuditPage() {
   }
 
   const canProceedToStep2 = file && headers.length > 0;
+  const modelNameInvalid = newModelName.trim() === "" && !modelId;
   const canProceedToStep3 = attributes.filter(a => a.name && a.privileged_group && a.unprivileged_group).length > 0;
-  const canSubmit = canProceedToStep2 && canProceedToStep3 && selectedMetrics.length > 0 && (modelId || newModelName);
+  const canSubmit = canProceedToStep2 && canProceedToStep3 && selectedMetrics.length > 0 && (modelId || newModelName) && !modelNameInvalid;
 
   return (
     <section className="new-audit">
@@ -159,7 +166,9 @@ export function NewAuditPage() {
                       value={newModelName} 
                       onChange={(e) => setNewModelName(e.target.value)} 
                       placeholder="e.g., Credit Scoring v3.1"
+                      className={modelNameInvalid ? "input-error" : ""}
                     />
+                    {modelNameInvalid && <span className="field-error">Model name is required</span>}
                   </label>
                   <label>
                     Use case

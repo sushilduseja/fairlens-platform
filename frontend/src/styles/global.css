@@ -1286,6 +1286,17 @@ td {
   color: var(--danger);
 }
 
+.input-error {
+  border-color: var(--danger) !important;
+}
+
+.field-error {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--danger);
+  margin-top: 0.25rem;
+}
+
 /* File Uploader */
 .file-uploader {
   width: 100%;

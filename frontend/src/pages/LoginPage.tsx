@@ -2,6 +2,7 @@ import { FormEvent, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+import { AuthError } from "../hooks/useApi";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -27,11 +28,18 @@ export function LoginPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setIsLoading(true);
+    setError(null);
     try {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

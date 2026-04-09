@@ -21,8 +21,16 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   });
 
   if (response.status === 401) {
+    const body = await response.text();
+    let message = "Authentication required";
+    try {
+      const parsed = JSON.parse(body);
+      message = parsed.detail || message;
+    } catch {
+      // Use default message
+    }
     window.dispatchEvent(new CustomEvent('auth:logout'));
-    throw new AuthError('Authentication required');
+    throw new AuthError(message);
   }
 
   if (!response.ok) {
@@ -30,5 +38,11 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new Error(message || `Request failed (${response.status})`);
   }
 
-  return (await response.json()) as T;
+  // Handle empty responses (e.g., 204 No Content)
+  const text = await response.text();
+  if (!text) {
+    return null as T;
+  }
+
+  return JSON.parse(text) as T;
 }
