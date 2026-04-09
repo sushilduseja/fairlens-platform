@@ -3,22 +3,34 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../../hooks/useAuth';
+import { apiFetch } from '../../hooks/useApi';
 import { LoginPage } from '../../pages/LoginPage';
 import { RegisterPage } from '../../pages/RegisterPage';
 import { LayoutShell } from '../../components/LayoutShell';
 
 vi.mock('../../hooks/useApi', () => ({
-  apiFetch: vi.fn(),
+  apiFetch: vi.fn().mockResolvedValue(null),
+  AuthError: class AuthError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'AuthError';
+    }
+  },
 }));
 
-import { apiFetch } from '../../hooks/useApi';
-
-const renderWithAuth = (component: React.ReactElement) => {
-  return render(
+const renderWithAuth = async (component: React.ReactElement) => {
+  const renderResult = render(
     <BrowserRouter>
       <AuthProvider>{component}</AuthProvider>
     </BrowserRouter>
   );
+
+  await waitFor(() => {
+    const loadingElement = renderResult.container.querySelector('.auth-container');
+    return !loadingElement || loadingElement.textContent !== 'Loading...';
+  });
+
+  return renderResult;
 };
 
 describe('Auth Flow Integration', () => {
@@ -31,7 +43,7 @@ describe('Auth Flow Integration', () => {
   it('login shows error on invalid credentials', async () => {
     (apiFetch as vi.Mock).mockRejectedValue(new Error('Invalid credentials'));
     
-    renderWithAuth(<LoginPage />);
+    await renderWithAuth(<LoginPage />);
     
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
@@ -49,7 +61,7 @@ describe('Auth Flow Integration', () => {
   it('register shows error on failed registration', async () => {
     (apiFetch as vi.Mock).mockRejectedValue(new Error('Email already exists'));
     
-    renderWithAuth(<RegisterPage />);
+    await renderWithAuth(<RegisterPage />);
     
     const nameInput = screen.getByLabelText(/full name/i);
     const emailInput = screen.getByLabelText(/email/i);
@@ -68,8 +80,8 @@ describe('Auth Flow Integration', () => {
 });
 
 describe('Layout Integration', () => {
-  it('LayoutShell renders with all navigation items', () => {
-    renderWithAuth(<LayoutShell />);
+  it('LayoutShell renders with all navigation items', async () => {
+    await renderWithAuth(<LayoutShell />);
     
     expect(screen.getByText('FairLens')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
@@ -78,8 +90,8 @@ describe('Layout Integration', () => {
     expect(screen.getByText('v0.1.0')).toBeInTheDocument();
   });
 
-  it('LayoutShell has sidebar structure', () => {
-    renderWithAuth(<LayoutShell />);
+  it('LayoutShell has sidebar structure', async () => {
+    await renderWithAuth(<LayoutShell />);
     
     expect(document.querySelector('.sidebar')).toBeInTheDocument();
     expect(document.querySelector('.sidebar-nav')).toBeInTheDocument();

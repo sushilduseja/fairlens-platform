@@ -57,9 +57,13 @@ async def register(
         await db.rollback()
         raise HTTPException(status_code=409, detail="Email already registered.")
 
-    await log_action(
-        db, "user.registered", "User", user.id, user=user, details={"email": user.email}
-    )
+    try:
+        await log_action(
+            db, "user.registered", "User", user.id, user=user, details={"email": user.email}
+        )
+    except Exception:
+        pass
+
     await db.refresh(user)
     return RegisterResponse(user_id=user.id, api_key=user.api_key)
 
@@ -88,7 +92,11 @@ async def login(
         samesite="strict",
         max_age=60 * 60 * 24,
     )
-    await log_action(db, "user.login", "User", user.id, user=user)
+    try:
+        await log_action(db, "user.login", "User", user.id, user=user)
+    except Exception:
+        pass
+
     return LoginResponse(
         session_token=token,
         user=UserBrief(id=user.id, email=user.email, name=user.name),

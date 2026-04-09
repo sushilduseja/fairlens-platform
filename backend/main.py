@@ -1,6 +1,7 @@
 """FastAPI application entrypoint."""
 
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
@@ -14,7 +15,12 @@ from backend.db.session import init_db
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        await init_db()
+        yield
+
+    app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION, lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
@@ -60,10 +66,6 @@ def create_app() -> FastAPI:
             return HTMLResponse(content=index_file.read_text(), media_type="text/html")
 
         raise HTTPException(status_code=404, detail="Not found")
-
-    @app.on_event("startup")
-    async def startup_event() -> None:
-        await init_db()
 
     return app
 

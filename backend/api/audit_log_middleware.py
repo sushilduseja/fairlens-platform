@@ -15,16 +15,25 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.url.path.startswith("/api/v1/"):
-            async with async_session() as session:
-                session.add(
-                    AuditLog(
-                        user_id=None,
-                        action="api.state_change",
-                        resource_type="APIRequest",
-                        resource_id=getattr(request.state, "request_id", str(uuid4())),
-                        details={"method": request.method, "path": request.url.path, "status": response.status_code},
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.url.path.startswith(
+            "/api/v1/"
+        ):
+            try:
+                async with async_session() as session:
+                    session.add(
+                        AuditLog(
+                            user_id=None,
+                            action="api.state_change",
+                            resource_type="APIRequest",
+                            resource_id=getattr(request.state, "request_id", str(uuid4())),
+                            details={
+                                "method": request.method,
+                                "path": request.url.path,
+                                "status": response.status_code,
+                            },
+                        )
                     )
-                )
-                await session.commit()
+                    await session.commit()
+            except Exception:
+                pass
         return response

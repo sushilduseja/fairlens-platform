@@ -30,10 +30,16 @@ def test_array_bootstrap_and_permutation_helpers():
     def stat(p, y, g):
         am = g == "A"
         bm = g == "B"
-        return float(abs(y[am].mean() - y[bm].mean()))
+        mean_a = y[am].mean() if am.any() else 0.0
+        mean_b = y[bm].mean() if bm.any() else 0.0
+        return float(abs(mean_a - mean_b))
 
-    point, lo, hi = bootstrap_confidence_interval_from_arrays([preds, labels, groups], stat, n_iterations=100)
-    p = permutation_test_from_arrays([preds, labels, groups], group_array_index=2, statistic_fn=stat, n_permutations=100)
+    point, lo, hi = bootstrap_confidence_interval_from_arrays(
+        [preds, labels, groups], stat, n_iterations=100
+    )
+    p = permutation_test_from_arrays(
+        [preds, labels, groups], group_array_index=2, statistic_fn=stat, n_permutations=100
+    )
 
     assert lo <= point <= hi
     assert 0.0 <= p <= 1.0

@@ -3,10 +3,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../hooks/useAuth';
+import { apiFetch } from '../hooks/useApi';
 import { RegisterPage } from '../pages/RegisterPage';
 
 vi.mock('../hooks/useApi', () => ({
-  apiFetch: vi.fn(),
+  apiFetch: vi.fn().mockResolvedValue(null),
+  AuthError: class AuthError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'AuthError';
+    }
+  },
 }));
 
 const renderWithRouter = (component: React.ReactElement) => {
@@ -16,8 +23,6 @@ const renderWithRouter = (component: React.ReactElement) => {
     </BrowserRouter>
   );
 };
-
-import { apiFetch } from '../hooks/useApi';
 
 describe('RegisterPage', () => {
   beforeEach(() => {

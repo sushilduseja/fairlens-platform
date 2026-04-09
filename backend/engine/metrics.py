@@ -49,6 +49,7 @@ THRESHOLDS = {
 
 # ── Helper: split groups ───────────────────────────────────────────────────
 
+
 def _split_groups(
     values: NDArray, groups: NDArray, privileged: str, unprivileged: str
 ) -> tuple[NDArray, NDArray]:
@@ -60,9 +61,12 @@ def _split_groups(
 
 # ── 1. Demographic Parity ──────────────────────────────────────────────────
 
+
 def _dp_disparity(group_a: NDArray, group_b: NDArray) -> float:
     """Absolute difference in positive prediction rates."""
-    return float(np.mean(group_a) - np.mean(group_b))
+    mean_a = np.mean(group_a) if group_a.size > 0 else 0.0
+    mean_b = np.mean(group_b) if group_b.size > 0 else 0.0
+    return float(mean_a - mean_b)
 
 
 def demographic_parity(
@@ -80,8 +84,8 @@ def demographic_parity(
     thr = threshold or THRESHOLDS["demographic_parity"]
     priv_preds, unpriv_preds = _split_groups(predictions, groups, privileged, unprivileged)
 
-    priv_rate = float(np.mean(priv_preds))
-    unpriv_rate = float(np.mean(unpriv_preds))
+    priv_rate = float(np.mean(priv_preds)) if priv_preds.size > 0 else 0.0
+    unpriv_rate = float(np.mean(unpriv_preds)) if unpriv_preds.size > 0 else 0.0
 
     point, ci_lo, ci_hi = bootstrap_confidence_interval(priv_preds, unpriv_preds, _dp_disparity)
     p_val = permutation_test(priv_preds, unpriv_preds, _dp_disparity)
@@ -115,6 +119,7 @@ def demographic_parity(
 
 
 # ── 2. Equalized Odds ──────────────────────────────────────────────────────
+
 
 def _tpr(predictions: NDArray, labels: NDArray) -> float:
     positives = labels == 1
@@ -206,6 +211,7 @@ def equalized_odds(
 
 
 # ── 3. Calibration ─────────────────────────────────────────────────────────
+
 
 def calibration(
     predictions: NDArray,
@@ -301,6 +307,7 @@ def calibration(
 
 
 # ── 4. Predictive Equality ─────────────────────────────────────────────────
+
 
 def predictive_equality(
     predictions: NDArray,

@@ -1,41 +1,18 @@
 """Backend authentication tests."""
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 from uuid import uuid4
-
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 
 class TestAuthEndpoints:
     """Test authentication endpoints."""
 
-    @pytest.fixture
-    def client(self):
-        from backend.main import app
-
-        return TestClient(app)
-
-    def test_login_invalid_credentials_returns_401(self, client):
-        """Test that invalid credentials return 401."""
-        response = client.post(
-            "/api/v1/auth/login", json={"email": "wrong@example.com", "password": "wrongpassword"}
-        )
-        assert response.status_code == 401
-
-    def test_register_duplicate_email_returns_409(self, client):
-        """Test that duplicate email registration returns 409."""
-        response = client.post(
-            "/api/v1/auth/register",
-            json={"email": "test@example.com", "name": "Test", "password": "password123"},
-        )
-        assert response.status_code in [201, 409]
-
-    def test_register_valid_returns_201(self, client):
+    @pytest.mark.asyncio
+    async def test_register_valid_returns_201(self, client: AsyncClient):
         """Test that valid registration returns 201."""
         unique_email = f"test-{uuid4().hex[:8]}@example.com"
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/register",
             json={"email": unique_email, "name": "Test User", "password": "password123"},
         )
@@ -45,29 +22,48 @@ class TestAuthEndpoints:
         assert "api_key" in data
         assert data["api_key"].startswith("fl_")
 
+    @pytest.mark.asyncio
+    async def test_register_duplicate_email_returns_409(self, client: AsyncClient):
+        """Test that duplicate email registration returns 409."""
+        unique_email = f"test-{uuid4().hex[:8]}@example.com"
+        await client.post(
+            "/api/v1/auth/register",
+            json={"email": unique_email, "name": "Test", "password": "password123"},
+        )
+        response = await client.post(
+            "/api/v1/auth/register",
+            json={"email": unique_email, "name": "Test", "password": "password123"},
+        )
+        assert response.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_login_invalid_credentials_returns_401(self, client: AsyncClient):
+        """Test that invalid credentials return 401."""
+        response = await client.post(
+            "/api/v1/auth/login", json={"email": "wrong@example.com", "password": "wrongpassword"}
+        )
+        assert response.status_code == 401
+
 
 class TestProtectedEndpoints:
     """Test protected endpoint access control."""
 
-    @pytest.fixture
-    def client(self):
-        from backend.main import app
-
-        return TestClient(app)
-
-    def test_audits_requires_auth(self, client):
+    @pytest.mark.asyncio
+    async def test_audits_requires_auth(self, client: AsyncClient):
         """Test that /audits endpoint requires authentication."""
-        response = client.get("/api/v1/audits")
+        response = await client.get("/api/v1/audits")
         assert response.status_code == 401
 
-    def test_models_requires_auth(self, client):
+    @pytest.mark.asyncio
+    async def test_models_requires_auth(self, client: AsyncClient):
         """Test that /models endpoint requires authentication."""
-        response = client.get("/api/v1/models")
+        response = await client.get("/api/v1/models")
         assert response.status_code == 401
 
-    def test_health_endpoint_no_auth_required(self, client):
+    @pytest.mark.asyncio
+    async def test_health_endpoint_no_auth_required(self, client: AsyncClient):
         """Test that health endpoint doesn't require auth."""
-        response = client.get("/healthz")
+        response = await client.get("/healthz")
         assert response.status_code == 200
         assert response.json() == {"status": "ok"}
 
