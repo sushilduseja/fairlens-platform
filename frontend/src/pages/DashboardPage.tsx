@@ -24,6 +24,7 @@ export function DashboardPage() {
     passRate: 0,
     pendingCount: 0,
     failCount: 0,
+    completedCount: 0,
   });
 
   useEffect(() => {

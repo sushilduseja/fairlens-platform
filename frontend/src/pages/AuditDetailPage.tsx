@@ -67,7 +67,7 @@ export function AuditDetailPage() {
         <div className="narrative-card animate-in" style={{animationDelay: "50ms"}}>
           <h3>Executive Summary</h3>
           <div className="narrative-content">
-            {audit.narrative_summary.split('\n\n').map((para, i) => (
+            {audit.narrative_summary?.split('\n\n').map((para, i) => (
               <p key={i}>{para}</p>
             ))}
           </div>
