@@ -389,6 +389,59 @@ td {
   padding: 0.7rem;
 }
 
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--surface) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+}
+
+.user-email {
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.logout-btn:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -2485,18 +2538,7 @@ td {
   margin-bottom: 0.35rem;
 }
 
-.metric-reference .empty-state {
-  padding: 3rem;
-  text-align: center;
-  color: var(--muted);
-}
 
-  padding: 3rem;
-  text-align: center;
-  color: var(--muted);
-}
-
-/* === OVERDRIVE ANIMATIONS === */
 @keyframes fadeSlideIn {
   from {
     opacity: 0;
