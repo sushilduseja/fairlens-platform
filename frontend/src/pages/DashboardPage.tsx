@@ -11,6 +11,7 @@ interface DashboardStats {
   passRate: number;
   pendingCount: number;
   failCount: number;
+  completedCount: number;
 }
 
 export function DashboardPage() {
@@ -46,6 +47,7 @@ export function DashboardPage() {
           passRate: completed.length > 0 ? Math.round((passed.length / completed.length) * 100) : 0,
           pendingCount: pending.length,
           failCount: failed.length,
+          completedCount: completed.length,
         });
       })
       .catch((err) => {
@@ -74,69 +76,42 @@ export function DashboardPage() {
         </Link>
       </div>
 
-      {/* KPI Cards */}
+      {/* Summary Metrics */}
       {loading ? (
-        <div className="kpi-grid">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="kpi-card">
-              <div className={`kpi-icon shimmer`} style={{ width: 40, height: 40, borderRadius: 8 }} />
-              <div className="kpi-content">
-                <span className="kpi-value shimmer" style={{ width: 60, height: 28, borderRadius: 4 }} />
-                <span className="kpi-label shimmer" style={{ width: 80, height: 16, borderRadius: 4 }} />
-              </div>
-            </div>
-          ))}
+        <div className="summary-metrics">
+          <div className="metric-main shimmer" style={{ width: '100%', height: 120, borderRadius: 8 }} />
+          <div className="metric-sub-grid">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="metric-sub-card shimmer" style={{ width: '100%', height: 80, borderRadius: 8 }} />
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <div className="kpi-icon total">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
+        <div className="summary-metrics">
+          <div className="metric-main">
+            <div className="metric-header">
+              <span className="metric-label">Overall Pass Rate</span>
+              <div className="metric-status-pill" style={{ color: 'var(--color-pass)', backgroundColor: 'var(--color-pass-bg)' }}>
+                Healthy
+              </div>
             </div>
-            <div className="kpi-content">
-              <span className="kpi-value">{stats.totalAudits}</span>
-              <span className="kpi-label">Total Audits</span>
-            </div>
-          </div>
-          
-          <div className="kpi-card">
-            <div className="kpi-icon pass">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <path d="M22 4L12 14.01l-3-3"/>
-              </svg>
-            </div>
-            <div className="kpi-content">
-              <span className="kpi-value">{stats.passRate}%</span>
-              <span className="kpi-label">Pass Rate</span>
+            <div className="metric-value-large">{stats.passRate}%</div>
+            <div className="metric-footer">
+              Based on {stats.completedCount} completed audits
             </div>
           </div>
-          
-          <div className="kpi-card">
-            <div className="kpi-icon pending">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
+          <div className="metric-sub-grid">
+            <div className="metric-sub-card">
+              <span className="metric-label">Total Audits</span>
+              <span className="metric-value">{stats.totalAudits}</span>
             </div>
-            <div className="kpi-content">
-              <span className="kpi-value">{stats.pendingCount}</span>
-              <span className="kpi-label">Pending</span>
+            <div className="metric-sub-card">
+              <span className="metric-label">Pending</span>
+              <span className="metric-value">{stats.pendingCount}</span>
             </div>
-          </div>
-          
-          <div className="kpi-card">
-            <div className="kpi-icon fail">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M15 9l-6 6M9 9l6 6"/>
-              </svg>
-            </div>
-            <div className="kpi-content">
-              <span className="kpi-value">{stats.failCount}</span>
-              <span className="kpi-label">Failed</span>
+            <div className="metric-sub-card">
+              <span className="metric-label">Failed</span>
+              <span className="metric-value" style={{ color: 'var(--color-fail)' }}>{stats.failCount}</span>
             </div>
           </div>
         </div>
@@ -183,15 +158,16 @@ export function DashboardPage() {
         ) : audits.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                <path d="M12 11v6M9 14h6"/>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2"/>
               </svg>
             </div>
-            <h4>No audits yet</h4>
-            <p>Run your first fairness check to see results here.</p>
+            <h4>No Fairness Audits Detected</h4>
+            <p>Your dashboard is empty. Start by uploading a model prediction dataset to analyze fairness and compliance across your protected attributes.</p>
             <Link to="/audits/new" className="btn-primary">
-              Create Your First Audit
+              Run Your First Audit
             </Link>
           </div>
         ) : (

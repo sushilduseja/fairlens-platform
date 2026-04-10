@@ -501,7 +501,22 @@ CTA Button: Primary style
 
 ---
 
-## Implementation Notes
+## Premium Polish & A+ Standard
+
+To achieve an A+ design score, FairLens must move beyond "functional" to "exceptional." 
+
+### Anti-AI-Slop Mandate
+- **NO Generic Grids:** Replace the 3- or 4-column feature/stat grids with asymmetric, data-driven layouts.
+- **NO Decorative Blobs:** Remove all ornamental SVG dividers, floating circles, or generic gradients.
+- **NO Generic Copy:** Replace "Welcome Back" or "Unlock the power of..." with utility-driven, professional language.
+- **NO Bubbly Defaults:** Border radii must be systematic. Large radii are for containers; small, sharp radii are for precision data elements.
+
+### Precision Instrument Details
+- **Micro-interactions:** Every interactive element must have a distinct, high-quality state change (subtle scale, color shift, or depth change).
+- **Data-Dense Layouts:** Prioritize information density over whitespace. Use tabular layouts and compact components for audit results.
+- **Motion with Purpose:** Use `fade-in-stagger` for page loads and `shimmer` for loading states. No purely ornamental animations.
+- **Type-Perfect:** Enforce strict adherence to the IBM Plex scale. No generic "font-size: 1.2rem" — use the tokens.
+
 
 ### CSS Custom Properties
 

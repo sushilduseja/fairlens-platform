@@ -108,23 +108,26 @@ export function AuditDetailPage() {
         </div>
       )}
 
-      {/* Dataset Info */}
-      <div className="info-grid animate-in" style={{animationDelay: "100ms"}}>
-        <div className="info-card">
-          <span className="info-label">Dataset Rows</span>
-          <span className="info-value">{audit.dataset_row_count?.toLocaleString() ?? "-"}</span>
+      {/* Audit Metadata Bar */}
+      <div className="audit-metadata-bar animate-in" style={{animationDelay: "100ms"}}>
+        <div className="metadata-item">
+          <span className="metadata-label">Dataset Size</span>
+          <span className="metadata-value">{audit.dataset_row_count?.toLocaleString() ?? "-"} rows</span>
         </div>
-        <div className="info-card">
-          <span className="info-label">Started</span>
-          <span className="info-value">{formatDate(audit.started_at)}</span>
+        <div className="metadata-divider"></div>
+        <div className="metadata-item">
+          <span className="metadata-label">Started</span>
+          <span className="metadata-value">{formatDate(audit.started_at)}</span>
         </div>
-        <div className="info-card">
-          <span className="info-label">Completed</span>
-          <span className="info-value">{formatDate(audit.completed_at)}</span>
+        <div className="metadata-divider"></div>
+        <div className="metadata-item">
+          <span className="metadata-label">Completed</span>
+          <span className="metadata-value">{formatDate(audit.completed_at)}</span>
         </div>
-        <div className="info-card">
-          <span className="info-label">Protected Attributes</span>
-          <span className="info-value">{audit.protected_attributes?.length ?? 0}</span>
+        <div className="metadata-divider"></div>
+        <div className="metadata-item">
+          <span className="metadata-label">Protected Attributes</span>
+          <span className="metadata-value">{audit.protected_attributes?.length ?? 0} defined</span>
         </div>
       </div>
 
@@ -184,17 +187,18 @@ export function AuditDetailPage() {
         </div>
       )}
 
-      {/* No Recommendations */}
+      {/* Verified Pass State */}
       {audit.overall_verdict === "PASS" && audit.recommendations.length === 0 && !isProcessing && (
-        <div className="success-state animate-in" style={{animationDelay: "200ms"}}>
-          <div className="success-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
+        <div className="verified-pass-state animate-in" style={{animationDelay: "200ms"}}>
+          <div className="verified-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              <path d="M8 12l3 3 5-5"/>
             </svg>
           </div>
-          <h3>All Checks Passed</h3>
-          <p>This audit passed all fairness criteria. No recommendations needed.</p>
+          <h3>Audit Verified: PASS</h3>
+          <p>The model prediction dataset has been rigorously tested against all specified fairness metrics. No significant disparity was detected across the protected attributes.</p>
+          <div className="verification-badge">Certified Compliance Ready</div>
         </div>
       )}
     </section>
