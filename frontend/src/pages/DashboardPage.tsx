@@ -15,6 +15,7 @@ interface DashboardStats {
 
 export function DashboardPage() {
   const [data, setData] = useState<AuditListResponse | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [stats, setStats] = useState<DashboardStats>({
@@ -31,6 +32,7 @@ export function DashboardPage() {
         if (!active) return;
         setData(response);
         setError(null);
+        setLoading(false);
         
         // Calculate stats from loaded audits
         const audits = response.audits;
@@ -49,6 +51,7 @@ export function DashboardPage() {
       .catch((err) => {
         if (!active) return;
         setError(err instanceof Error ? err.message : "Failed to load audits");
+        setLoading(false);
       });
     return () => { active = false; };
   }, [page]);
@@ -72,58 +75,72 @@ export function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-icon total">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
+      {loading ? (
+        <div className="kpi-grid">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="kpi-card">
+              <div className={`kpi-icon shimmer`} style={{ width: 40, height: 40, borderRadius: 8 }} />
+              <div className="kpi-content">
+                <span className="kpi-value shimmer" style={{ width: 60, height: 28, borderRadius: 4 }} />
+                <span className="kpi-label shimmer" style={{ width: 80, height: 16, borderRadius: 4 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-icon total">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div className="kpi-content">
+              <span className="kpi-value">{stats.totalAudits}</span>
+              <span className="kpi-label">Total Audits</span>
+            </div>
           </div>
-          <div className="kpi-content">
-            <span className="kpi-value">{stats.totalAudits}</span>
-            <span className="kpi-label">Total Audits</span>
+          
+          <div className="kpi-card">
+            <div className="kpi-icon pass">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <path d="M22 4L12 14.01l-3-3"/>
+              </svg>
+            </div>
+            <div className="kpi-content">
+              <span className="kpi-value">{stats.passRate}%</span>
+              <span className="kpi-label">Pass Rate</span>
+            </div>
+          </div>
+          
+          <div className="kpi-card">
+            <div className="kpi-icon pending">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div className="kpi-content">
+              <span className="kpi-value">{stats.pendingCount}</span>
+              <span className="kpi-label">Pending</span>
+            </div>
+          </div>
+          
+          <div className="kpi-card">
+            <div className="kpi-icon fail">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M15 9l-6 6M9 9l6 6"/>
+              </svg>
+            </div>
+            <div className="kpi-content">
+              <span className="kpi-value">{stats.failCount}</span>
+              <span className="kpi-label">Failed</span>
+            </div>
           </div>
         </div>
-        
-        <div className="kpi-card">
-          <div className="kpi-icon pass">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-              <path d="M22 4L12 14.01l-3-3"/>
-            </svg>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">{stats.passRate}%</span>
-            <span className="kpi-label">Pass Rate</span>
-          </div>
-        </div>
-        
-        <div className="kpi-card">
-          <div className="kpi-icon pending">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">{stats.pendingCount}</span>
-            <span className="kpi-label">Pending</span>
-          </div>
-        </div>
-        
-        <div className="kpi-card">
-          <div className="kpi-icon fail">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M15 9l-6 6M9 9l6 6"/>
-            </svg>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">{stats.failCount}</span>
-            <span className="kpi-label">Failed</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Error state */}
       {error ? <div className="error-banner">{error}</div> : null}
@@ -145,7 +162,25 @@ export function DashboardPage() {
           )}
         </div>
 
-        {audits.length === 0 ? (
+        {loading ? (
+          <div className="audit-cards">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="audit-card">
+                <div className="audit-card-main">
+                  <span className="audit-model shimmer" style={{ width: 150, height: 20, borderRadius: 4 }} />
+                  <div className="audit-card-badges">
+                    <span className="shimmer" style={{ width: 40, height: 24, borderRadius: 12 }} />
+                    <span className="shimmer" style={{ width: 50, height: 24, borderRadius: 12 }} />
+                  </div>
+                </div>
+                <div className="audit-card-meta">
+                  <span className="shimmer" style={{ width: 70, height: 20, borderRadius: 4 }} />
+                  <span className="shimmer" style={{ width: 100, height: 16, borderRadius: 4 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : audits.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -45,7 +45,7 @@ describe('LoginPage', () => {
     await renderWithRouter(<LoginPage />);
     
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i, { selector: 'input' })).toBeInTheDocument();
   });
 
   it('renders Sign In button', async () => {
@@ -77,7 +77,7 @@ describe('LoginPage', () => {
     const user = userEvent.setup();
     await renderWithRouter(<LoginPage />);
     
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     await user.type(passwordInput, 'password123');
     
     expect(passwordInput).toHaveValue('password123');
@@ -90,7 +90,7 @@ describe('LoginPage', () => {
     await renderWithRouter(<LoginPage />);
     
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /sign in/i });
     
     await user.type(emailInput, 'test@example.com');
@@ -115,7 +115,7 @@ describe('LoginPage', () => {
     await renderWithRouter(<LoginPage />);
     
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /sign in/i });
     
     await user.type(emailInput, 'test@example.com');
@@ -131,7 +131,7 @@ describe('LoginPage', () => {
     await renderWithRouter(<LoginPage />);
     
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     
     expect(emailInput).toHaveAttribute('type', 'email');
     expect(emailInput).toBeRequired();

@@ -46,7 +46,7 @@ describe('Auth Flow Integration', () => {
     await renderWithAuth(<LoginPage />);
     
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /sign in/i });
     
     await userEvent.setup().type(emailInput, 'wrong@example.com');
@@ -65,7 +65,7 @@ describe('Auth Flow Integration', () => {
     
     const nameInput = screen.getByLabelText(/full name/i);
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /create account/i });
     
     await userEvent.setup().type(nameInput, 'Test User');

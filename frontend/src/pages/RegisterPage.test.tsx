@@ -41,7 +41,7 @@ describe('RegisterPage', () => {
     
     expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i, { selector: 'input' })).toBeInTheDocument();
   });
 
   it('renders Create Account button', () => {
@@ -69,7 +69,7 @@ describe('RegisterPage', () => {
     
     const nameInput = screen.getByLabelText(/full name/i);
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /create account/i });
     
     await userEvent.setup().type(nameInput, 'Test User');
@@ -89,7 +89,7 @@ describe('RegisterPage', () => {
     
     const nameInput = screen.getByLabelText(/full name/i);
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     const submitButton = screen.getByRole('button', { name: /create account/i });
     
     await userEvent.setup().type(nameInput, 'Test User');
@@ -105,7 +105,7 @@ describe('RegisterPage', () => {
   it('validates password minimum length', () => {
     renderWithRouter(<RegisterPage />);
     
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/password/i, { selector: 'input' });
     expect(passwordInput).toHaveAttribute('minLength', '8');
   });
 

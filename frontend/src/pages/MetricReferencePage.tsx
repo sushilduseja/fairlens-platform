@@ -18,11 +18,14 @@ const useCaseFilters = [
 export function MetricReferencePage() {
   const [metrics, setMetrics] = useState<MetricInfo[]>([]);
   const [filter, setFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     apiFetch<MetricsResponse>("/metrics")
       .then((response) => setMetrics(response.metrics))
-      .catch(() => setMetrics([]));
+      .catch(() => setMetrics([]))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filtered = useMemo(
@@ -53,7 +56,27 @@ export function MetricReferencePage() {
       </div>
 
       <div className="metrics-grid">
-        {filtered.map((metric) => (
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <article key={i} className="metric-card skeleton-card">
+                <div className="metric-header">
+                  <div className="skeleton-title"></div>
+                  <div className="skeleton-badge"></div>
+                </div>
+                <div className="skeleton-description"></div>
+                <div className="metric-details">
+                  <div className="detail-section">
+                    <div className="skeleton-subtitle"></div>
+                    <div className="skeleton-tags"></div>
+                  </div>
+                  <div className="detail-section">
+                    <div className="skeleton-subtitle"></div>
+                    <div className="skeleton-list"></div>
+                  </div>
+                </div>
+              </article>
+            ))
+          : filtered.map((metric) => (
           <article key={metric.name} className="metric-card">
             <div className="metric-header">
               <h3>{metric.display_name}</h3>

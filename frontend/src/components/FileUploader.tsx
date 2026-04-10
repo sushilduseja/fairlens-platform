@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+
 type Props = {
   onFileSelected: (file: File, headers: string[]) => void;
 };
@@ -11,6 +13,11 @@ export function FileUploader({ onFileSelected }: Props) {
 
   async function processFile(file: File | undefined) {
     if (!file) return;
+    
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File exceeds 500MB limit.");
+      return;
+    }
     
     if (!file.name.toLowerCase().endsWith(".csv")) {
       setError("Only CSV files supported.");
