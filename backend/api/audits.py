@@ -43,7 +43,8 @@ async def create_audit(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AuditCreateResponse:
-    model = await db.get(Model, model_id)
+    result = await db.execute(select(Model).where(Model.id == model_id))
+    model = result.scalar_one_or_none()
     if model is None or model.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Model not found.")
 
@@ -83,7 +84,6 @@ async def create_audit(
         user=current_user,
         details={"model_id": model.id, "selected_metrics": metrics},
     )
-    await db.refresh(audit)
     return AuditCreateResponse(audit_id=audit.id, status=audit.status, created_at=audit.created_at)
 
 
@@ -99,6 +99,7 @@ async def get_audit(
         .options(
             selectinload(Audit.results),
             selectinload(Audit.recommendations),
+            selectinload(Audit.model),
         )
     )
     audit = result.scalar_one_or_none()

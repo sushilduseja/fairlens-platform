@@ -6,7 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-from sqlalchemy import delete
+from sqlalchemy import delete, select
+from sqlalchemy.orm import selectinload
 
 from backend.db.models import Audit, FairnessResult, Recommendation
 from backend.db.session import async_session
@@ -17,7 +18,10 @@ from backend.engine.llm import generate_narrative_summary
 
 async def process_audit(ctx: dict, audit_id: str) -> None:
     async with async_session() as db:
-        audit = await db.get(Audit, audit_id)
+        result = await db.execute(
+            select(Audit).where(Audit.id == audit_id).options(selectinload(Audit.model))
+        )
+        audit = result.scalar_one_or_none()
         if audit is None:
             return
 
