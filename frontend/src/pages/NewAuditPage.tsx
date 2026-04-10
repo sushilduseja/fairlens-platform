@@ -222,29 +222,37 @@ export function NewAuditPage() {
                    <h3>Schema Mapping</h3>
                  </div>
                  <div className="mapping-grid">
-                   <div className="mapping-item">
-                     <label>Prediction Column</label>
-                     <div className="mapping-input-wrapper">
-                       <select value={predictionColumn} onChange={(e) => setPredictionColumn(e.target.value)}>
-                         {headers.map((header) => (
-                           <option key={header} value={header}>{header}</option>
-                         ))}
-                       </select>
-                       <span className="mapping-hint">Target continuous variable (0.0 - 1.0)</span>
-                     </div>
-                   </div>
-                   <div className="mapping-item">
-                     <label>Ground Truth Column</label>
-                     <div className="mapping-input-wrapper">
-                       <select value={groundTruthColumn} onChange={(e) => setGroundTruthColumn(e.target.value)}>
-                         <option value="">None (Unsupervised)</option>
-                         {headers.map((header) => (
-                           <option key={header} value={header}>{header}</option>
-                         ))}
-                       </select>
-                       <span className="mapping-hint">Actual outcomes for performance-based metrics</span>
-                     </div>
-                   </div>
+                    <div className="mapping-item">
+                      <label id="prediction-label">Prediction Column</label>
+                      <div className="mapping-input-wrapper">
+                        <select 
+                          value={predictionColumn} 
+                          onChange={(e) => setPredictionColumn(e.target.value)}
+                          aria-describedby="prediction-hint"
+                        >
+                          {headers.map((header) => (
+                            <option key={header} value={header}>{header}</option>
+                          ))}
+                        </select>
+                        <span id="prediction-hint" className="mapping-hint">Target continuous variable (0.0 - 1.0)</span>
+                      </div>
+                    </div>
+                    <div className="mapping-item">
+                      <label id="groundtruth-label">Ground Truth Column</label>
+                      <div className="mapping-input-wrapper">
+                        <select 
+                          value={groundTruthColumn} 
+                          onChange={(e) => setGroundTruthColumn(e.target.value)}
+                          aria-describedby="groundtruth-hint"
+                        >
+                          <option value="">None (Unsupervised)</option>
+                          {headers.map((header) => (
+                            <option key={header} value={header}>{header}</option>
+                          ))}
+                        </select>
+                        <span id="groundtruth-hint" className="mapping-hint">Actual outcomes for performance-based metrics</span>
+                      </div>
+                    </div>
                  </div>
                </div>
              )}

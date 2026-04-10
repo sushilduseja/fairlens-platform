@@ -21,21 +21,25 @@ export function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  function getPasswordStrength(pwd: string): { level: string; color: string } {
-    if (pwd.length < 8) return { level: "Weak", color: "#e74c3c" };
+  function getPasswordStrength(pwd: string): { level: string; colorVar: string } {
+    if (pwd.length < 8) return { level: "Weak", colorVar: "--color-strength-weak" };
     const hasMixedCase = /[a-z]/.test(pwd) && /[A-Z]/.test(pwd);
     const hasNumber = /\d/.test(pwd);
     const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
     if (pwd.length >= 10 && hasMixedCase && hasNumber && hasSpecial) {
-      return { level: "Strong", color: "#27ae60" };
+      return { level: "Strong", colorVar: "--color-strength-strong" };
     }
     if (pwd.length >= 8 && hasMixedCase && hasNumber) {
-      return { level: "Medium", color: "#f39c12" };
+      return { level: "Medium", colorVar: "--color-strength-medium" };
     }
-    return { level: "Weak", color: "#e74c3c" };
+    return { level: "Weak", colorVar: "--color-strength-weak" };
   }
 
   const passwordStrength = getPasswordStrength(password);
+
+  function getColor(colorVar: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -180,11 +184,11 @@ export function RegisterPage() {
                       className="strength-fill" 
                       style={{ 
                         width: passwordStrength.level === "Strong" ? "100%" : passwordStrength.level === "Medium" ? "66%" : "33%",
-                        backgroundColor: passwordStrength.color 
+                        backgroundColor: getColor(passwordStrength.colorVar)
                       }} 
                     />
                   </div>
-                  <span className="strength-label" style={{ color: passwordStrength.color }}>
+                  <span className="strength-label" style={{ color: getColor(passwordStrength.colorVar) }}>
                     {passwordStrength.level}
                   </span>
                 </div>

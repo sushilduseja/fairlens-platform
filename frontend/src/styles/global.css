@@ -92,8 +92,14 @@ label {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: minmax(180px, 260px) 1fr;
   min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 60px 1fr;
+  }
 }
 
 .sidebar {
@@ -824,7 +830,7 @@ td {
 }
 
 .progress-fill {
-  width: 60%;
+  width: 0%;
   height: 100%;
   background: linear-gradient(90deg, var(--warn), var(--accent));
   border-radius: 3px;
@@ -1123,6 +1129,11 @@ td {
 
   .table-card {
     overflow-x: auto;
+    min-width: 0;
+  }
+
+  .table-card table {
+    min-width: 600px;
   }
 }
 
@@ -1470,6 +1481,11 @@ td {
   background: var(--surface);
 }
 
+.upload-zone:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .upload-zone.dragging {
   border-color: var(--accent);
   background: var(--surface-elevated);
@@ -1658,6 +1674,12 @@ td {
 
 .password-toggle:hover {
   color: var(--foreground);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .password-strength {
@@ -1968,7 +1990,7 @@ td {
 .animate-in-stagger > *:nth-child(7) { animation-delay: 360ms; }
 .animate-in-stagger > *:nth-child(8) { animation-delay: 420ms; }
 
-.shimmer {
+.shimmer-slow {
   background: linear-gradient(
     90deg,
     var(--surface) 25%,
@@ -1977,6 +1999,11 @@ td {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+.shimmer-fast {
+  background: var(--border);
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .btn-primary {

@@ -52,6 +52,13 @@ export function FileUploader({ onFileSelected }: Props) {
     setIsDragging(false);
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      inputRef.current?.click();
+    }
+  }
+
   return (
     <div className="file-uploader">
       <div 
@@ -60,6 +67,10 @@ export function FileUploader({ onFileSelected }: Props) {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={() => inputRef.current?.click()}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label="Upload CSV file, click or press Enter to browse"
       >
         <input 
           ref={inputRef}

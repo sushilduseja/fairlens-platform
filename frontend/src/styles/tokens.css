@@ -27,6 +27,11 @@
   --color-violet: #4338ca;
   --color-violet-bg: #e0e7ff;
 
+  /* Password Strength */
+  --color-strength-strong: #27ae60;
+  --color-strength-medium: #f39c12;
+  --color-strength-weak: #e74c3c;
+
   /* Code Colors */
   --color-code-bg: #0f172a;
   --color-code-text: #f1f5f9;
@@ -48,6 +53,8 @@
   /* Typography Scale */
   --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-body: var(--font-sans);
+  --font-display: var(--font-sans);
 
   --text-xs: 12px;
   --text-sm: 14px;
@@ -100,4 +107,64 @@
   --violet: var(--color-violet);
   --violet-bg: var(--color-violet-bg);
   --radius: var(--radius-lg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Brand Colors - dark variants with WCAG AA contrast */
+    --color-brand: #4a7db8;
+    --color-brand-hover: #6b9fd4;
+    --color-brand-light: #7da8d4;
+
+    /* Semantic Colors - adjusted for dark backgrounds */
+    --color-pass: #34d399;
+    --color-pass-bg: #064e3b;
+    --color-fail: #f87171;
+    --color-fail-bg: #450a0a;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #451a03;
+    --color-info: #60a5fa;
+    --color-info-bg: #1e3a5f;
+
+    /* Neutral Palette - light text on dark backgrounds */
+    --color-neutral-900: #f1f5f9;
+    --color-neutral-700: #cbd5e1;
+    --color-neutral-500: #94a3b8;
+    --color-neutral-300: #475569;
+    --color-neutral-200: #334155;
+    --color-neutral-100: #1e293b;
+    --color-neutral-50: #0f172a;
+
+    /* Specialized */
+    --color-violet: #818cf8;
+    --color-violet-bg: #1e1b4b;
+
+    /* Password Strength - WCAG AA on dark */
+    --color-strength-strong: #4ade80;
+    --color-strength-medium: #fbbf24;
+    --color-strength-weak: #f87171;
+
+    /* Code Colors */
+    --color-code-bg: #1e293b;
+    --color-code-text: #e2e8f0;
+    --color-code-border: #475569;
+    --color-code-muted: #94a3b8;
+    --color-code-hover: #334155;
+
+    /* Legacy Aliases */
+    --white: #f1f5f9;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-elevated: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #475569;
+    --border-light: #334155;
+
+    /* Shadows for dark mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  }
 }
